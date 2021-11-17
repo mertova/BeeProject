@@ -1,3 +1,6 @@
+# Large files ignore 
+data/scans/Test 1977.pdf
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
