@@ -11,7 +11,13 @@ Three types of documents:
 2. question - answer 
 3. free text
 
-Source: ```some souce```
+Source: 
+```bash
+.
+├── data
+│   ├── scans      -- pdf images
+│   └── templates  -- digitalized templates
+```
 
 ### Related projects (models)
 Tobias Martine (DeepCurate) - https://github.com/TobiasMartine/DeepCurate
