@@ -15,8 +15,13 @@ Source:
 ```bash
 .
 ├── data
-│   ├── scans      -- pdf images
-│   └── templates  -- digitalized templates
+│   ├── scans      -- examples of scaned documents in different formats
+|   |   ├── pdf
+|   |   └── png
+│   ├── templates  -- digitalized templates (.xlsx - temporary)
+|   └── results    -- outputs of different models applied on our scan examples
+|       ├── HTSNet
+|       └── Martine-DeepCurate
 ```
 
 ### Related projects (models)
@@ -24,7 +29,7 @@ Tobias Martine (DeepCurate) - https://github.com/TobiasMartine/DeepCurate
 
 EDD-architecture - https://github.com/ibm-aur-nlp/EDD
 
-HTSNet - https://github.com/jottue/HTSNet
+HTSNet - https://github.com/jottue/HTSNet --> Does not work!!!
 
 ### Available datasets
 IAM Handwriting Database - https://fki.tic.heia-fr.ch/databases/iam-handwriting-database
