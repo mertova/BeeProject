@@ -15,11 +15,11 @@ Source:
 ```bash
 .
 ├── data
-│   ├── scans      -- examples of scaned documents in different formats
+│   ├── scans      -- #examples of scaned documents in different formats
 |   |   ├── pdf
 |   |   └── png
-│   ├── templates  -- digitalized templates (.xlsx - temporary)
-|   └── results    -- outputs of different models applied on our scan examples
+│   ├── templates  -- #digitalized templates (.xlsx - temporary)
+|   └── results    -- #outputs of different models applied on our scan examples
 |       ├── HTSNet
 |       └── Martine-DeepCurate
 ```
