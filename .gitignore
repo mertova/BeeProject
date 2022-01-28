@@ -1,5 +1,7 @@
-# Large files ignore 
-data/scans/Test 1977.pdf
+# Sensitive data ignore
+data/scans/*
+data/results/*
+data/templates/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
