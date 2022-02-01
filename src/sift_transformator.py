@@ -4,8 +4,7 @@ import numpy as np
 import cv2
 
 
-def map_img_to_ref(image, ref_image, method=cv2.RANSAC, ransac_thresh=5.0,
-                   MIN_MATCH_COUNT=1000):
+def map_img_to_ref(image, ref_image, method=cv2.RANSAC, ransac_thresh=5.0, MIN_MATCH_COUNT=1000):
     """ Calculates features of the given image and reference image, matches
         them, finds the corresponding transformation from the reference image to
         the image (if enough good matches (specified by 'MIN_MATCH_COUNT') are
@@ -36,7 +35,6 @@ def map_img_to_ref(image, ref_image, method=cv2.RANSAC, ransac_thresh=5.0,
     # Computing the transformation from the reference image to the image
     transform_mat, _ = cv2.findHomography(ref_pts, img_pts, method,
                                           ransac_thresh)
-    print("transformacna matica: ", transform_mat)
 
     # Specifying the size of the resulting transformed image
     # Here: using size the of the reference image
@@ -68,8 +66,6 @@ def flann_matches(descr_img, descr_ref):
     index_params = dict(algorithm=1, trees=5)
     search_params = dict(checks=50)
     flann = cv2.FlannBasedMatcher(index_params, search_params)
-    print(type(flann))
     # Finding all matching keypoints
     matches = flann.knnMatch(descr_ref, descr_img, k=2)
-    print(matches[0][0].distance)
     return matches
