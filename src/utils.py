@@ -1,7 +1,7 @@
 """"""
 
 import numpy as np
-import cv2
+from cv2 import cv2
 
 
 def map_img_to_ref(image, ref_image, method=cv2.RANSAC, ransac_thresh=5.0,
