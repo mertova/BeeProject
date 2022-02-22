@@ -1,7 +1,7 @@
 """"""
 
 import numpy as np
-import cv2
+from cv2 import cv2
 
 
 def map_img_to_ref(image, ref_image, method=cv2.RANSAC, ransac_thresh=5.0, MIN_MATCH_COUNT=1000):
@@ -25,7 +25,7 @@ def map_img_to_ref(image, ref_image, method=cv2.RANSAC, ransac_thresh=5.0, MIN_M
         print(f'Could not find enough good matches to match the images!')
         exit(-1)
 
-    # Creating a numpy array from the keypoints which are good matches for
+    # Creating a numpy array from the key points which are good matches for
     # the image and the reference image, respectively
     ref_pts = np.float32([kpts_ref[m.queryIdx].pt for m in
                           good]).reshape(-1, 1, 2)

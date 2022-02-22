@@ -2,6 +2,8 @@ import glob
 
 import numpy as np
 
+import lineUtils as lUtils
+import pointUtils as pUtils
 import line_recognition as lr
 from cv2 import cv2
 import template_extraction_utils as te
@@ -15,31 +17,20 @@ results_lines_path = '../data/results/line_recognition_results/'
 results_path = '../data/results/'
 
 
-# missing classification and transformation
 def main():
     images = load_grayscale_data(transformed_dir + "*.png")
     ref_image = cv2.imread(ref_img_path)
 
-    #cv2.imwrite(results_path + "results3/canny_grayscale.png", lr.sum_canny(images))
+    cv2.imwrite(results_path + "results3/canny_grayscale.png", lr.sum_canny(images))
 
-    # sum_canny, max_val = lr.sum_canny(images)
+    sum_canny, max_val = lr.sum_canny(images)
 
-    # te.binary_thresholding(sum_canny, max_val)
+    te.binary_thresholding(sum_canny, max_val)
 
-
-    '''
     gray_transformed = []
     for img in images:
         gray_transformed.append(map_img_to_ref(img, ref_image, MIN_MATCH_COUNT=10))
     print("transformed all images")
-    # write transformed
-    # write_data(gray_transformed, transformed_dir)
-    '''
-    # extract template from set of transformed scan
-    #template = te.extract_template(ref_image)
-    #cv2.imwrite(results_path + "results3/extracted_template1.png", template)
-
-    print("bye bye, ciao, dovidenia, nashledanou, dovidzenia, mua mua ")
 
 
 def line_scanner_hough():
@@ -47,17 +38,20 @@ def line_scanner_hough():
     img = lr.preprocessing(cv2.cvtColor(template, cv2.COLOR_BGR2GRAY))
     cv2.imwrite(results_path+"results7/preprocessing_template.png", img)
 
+    empty = np.copy(template)*0
     h_lines = lr.detect_lines_hough(img)
+    line_image = lUtils.write_lines(empty, h_lines)
+    cv2.imwrite(results_path + "results7/line_image_template_hough.png", line_image)
 
-    extended_lines = lr.make_lines_infinite(h_lines, template.shape[0], template.shape[1])
-    line_image = lr.write_lines(template, extended_lines)
-    cv2.imwrite(results_path + "results7/line_image_template_extended.png", line_image)
+    # extended_lines = lr.make_lines_infinite(h_lines, template.shape[0], template.shape[1])
+    # line_image = lUtils.write_lines(template, extended_lines)
+    # cv2.imwrite(results_path + "results7/line_image_template_extended.png", line_image)
 
-    reduced_lines = lr.reduce_lines(extended_lines)
-    line_image = lr.write_lines(template, reduced_lines)
-    cv2.imwrite(results_path + "results7/line_image_template_reduced.png", line_image)
-
-    point_image = lr.write_points(line_image, lr.calculate_intersections(reduced_lines))
+    intersections = lUtils.calculate_intersections(h_lines)
+    point_image = pUtils.write_points(line_image, intersections, (255, 255, 0))
+    x_centers, y_centers = pUtils.kmeans_xy(intersections)
+    point_image = pUtils.write_points(point_image, x_centers, (0, 0, 255))
+    point_image = pUtils.write_points(point_image, y_centers, (0, 0, 255))
     cv2.imwrite(results_path + "results7/point_image_template.png", point_image)
 
 
