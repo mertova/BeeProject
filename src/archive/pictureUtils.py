@@ -1,36 +1,27 @@
-from cv2 import cv2
+import cv2
 import statistics
-import numpy
 import numpy as np
 from matplotlib import pyplot as plt
 
 
-# calculate average from the input set of images
-# returns image
-def calculate_average_img(image_data):
-    avg_image = image_data[0]
-    for i in range(len(image_data)):
-        if i == 0:
-            pass
-        else:
-            alpha = 1.0 / (i + 1)
-            beta = 1.0 - alpha
-            avg_image = cv2.addWeighted(image_data[i], alpha, avg_image, beta, 0.0)
-    return avg_image
+# expects all images same shape!
+def sum_canny(images: list):
+    if (images is None) or (len(images) == 0):
+        return None
 
+    # Second, process edge detection use Canny.
+    low_threshold = 50
+    high_threshold = 300
+    sum_image = images[0] * 0
 
-# calculate average from the input set of images in grayscale
-# returns image
-def calculate_average_img_grayscale(image_data):
-    avg_image = cv2.cvtColor(image_data[0], cv2.COLOR_BGR2GRAY)
-    for i in range(len(image_data)):
-        if i == 0:
-            pass
-        else:
-            alpha = 1.0 / (i + 1)
-            beta = 1.0 - alpha
-            avg_image = cv2.addWeighted(cv2.cvtColor(image_data[i], cv2.COLOR_BGR2GRAY), alpha, avg_image, beta, 0.0)
-    return avg_image
+    kernel_size = 5
+
+    for image in images:
+        edges = cv2.Canny(cv2.GaussianBlur(image, (kernel_size, kernel_size), 0), low_threshold, high_threshold)
+        thresh1, edges = cv2.threshold(edges, 127, 1, cv2.THRESH_BINARY)
+        sum_image += edges
+
+    return sum_image, len(images)
 
 
 def calculate_bitwise_or(image_data):
@@ -52,20 +43,18 @@ def subtract_images(img1, img2):
     return img1 - img2
 
 
-def grayscale_numpy_images(images):
-    result = []
-    for image in images:
-        grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        result.append(grey)
-    cv2.imshow('cv2 mean', result[0])
-
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    return np.array(result)
+# Function to map each intensity level to output intensity level.
+def pixelVal(pix, r1, s1, r2, s2):
+    if (0 <= pix and pix <= r1):
+        return (s1 / r1) * pix
+    elif (r1 < pix and pix <= r2):
+        return ((s2 - s1) / (r2 - r1)) * (pix - r1) + s1
+    else:
+        return ((255 - s2) / (255 - r2)) * (pix - r2) + s2
 
 
 def calculate_median_img(images):
-    position_pix = np.zeros(10, dtype=numpy.uint8)
+    position_pix = np.zeros(10, dtype=np.uint8)
     # median_img = np.zeros((images.shape[1], images.shape[2]), np.int8)
     # mean_img = np.zeros((images.shape[1], images.shape[2]), np.int64)
     mode_img = np.zeros((images.shape[1], images.shape[2]), np.int64)
@@ -106,9 +95,11 @@ def calculate_mean_img(images):
 
 
 # todo
+# must be grey
 def adaptive_gaussian_thresholding(image, max_val: int):
-    img = cv2.medianBlur(image, 5)
-    ret, th1 = cv2.threshold(img, max_val - 3, 255, cv2.THRESH_BINARY)
+    inverse = cv2.bitwise_not(image)
+    img = cv2.medianBlur(inverse, 5)
+    ret, th1 = cv2.threshold(image, 200, 255, cv2.THRESH_BINARY)
     th2 = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
     th3 = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
     titles = ['Original Image', 'Global Thresholding (v = 127)',
@@ -119,34 +110,7 @@ def adaptive_gaussian_thresholding(image, max_val: int):
         plt.title(titles[i])
         plt.xticks([]), plt.yticks([])
     plt.show()
-
-
-def binary_thresholding(image, max_val: int):
-    print(max_val)
-    #plt.imshow(image, 'gray')
-    thresh1, image = cv2.threshold(image, 3, 255, cv2.THRESH_BINARY)
-    image = 255-image
-    plt.imshow(image, 'gray')
-    plt.show()
-    return image
-
-
-def extract_template(ref_images):
-    # img_data = load_images()
-    # img_data_greyscale = grayscale_numpy_images(img_data)
-    # mode = calculate_mode_img(img_data_greyscale)
-    # mean = calculate_mean_img(img_data_greyscale)
-    mean = cv2.imread('../data/results/extracting_template_out/mean.png', cv2.IMREAD_GRAYSCALE)
-    mode = cv2.imread('../data/results/extracting_template_out/mode.png', cv2.IMREAD_GRAYSCALE)
-
-    #(thresh, bw_mean_thresh) = cv2.threshold(255 - mean, 80, 255, cv2.THRESH_TOZERO)
-    #(thresh1, bw_mode_thresh) = cv2.threshold(255 - mode, 80, 255, cv2.THRESH_TOZERO)
-
-    #bw_mean_thresh_filter = 255 - bw_mean_thresh
-    #bw_mode_thresh_filter = 255 - bw_mode_thresh
-    #cv2.filterSpeckles(bw_mode_thresh_filter, 255, 1, 1)
-    #cv2.filterSpeckles(mode, 255, 1, 1)
-    return mode
+    return img, th1, th2, th3
 
 
 def draw_contours(img_gray):
@@ -160,25 +124,27 @@ def draw_contours(img_gray):
     return img_gray
 
 
-def isolated_pix_remove(image):
-    cv2.filterSpeckles(image, 255, 0, 2000)
-    return image
+def extract_template_mode(template, images):
+    if images is None or len(images) == 0:
+        print("empty directory of images")
+        return
 
-    """
-    cv2.imwrite('../data/results/extracting_template_out/bw_mean_thresh_filter.png', bw_mean_thresh_filter)
-    cv2.imwrite('../data/results/extracting_template_out/bw_mode_thresh_filter.png', bw_mode_thresh_filter)
-    #subtraction on images
-    subtr_img = subtract_images(gray1, gray2)
+    mode = calculate_mode_img(images)
+    cv2.imwrite("mode.png", mode)
+    mean = calculate_mean_img(images)
 
-    #bitwise operation on gray images
-    bitwiseAnd = cv2.bitwise_and(gray1, gray2)
-    bitwiseOr = cv2.bitwise_or(gray1, gray2)
-    bitwiseXor = cv2.bitwise_xor(gray1, gray2)
+    thresh, bw_mean_thresh = cv2.threshold(255 - mean, 80, 255, cv2.THRESH_TOZERO)
+    thresh1, bw_mode_thresh = cv2.threshold(255 - mode, 80, 255, cv2.THRESH_TOZERO)
 
-    cv2.imshow('bitwise And image', bitwiseAnd)
-    cv2.imshow('bitwise Or image', bitwiseOr)
-    cv2.imshow('bitwise Xor image', bitwiseXor)
+    bw_mean_thresh_filter = 255 - bw_mean_thresh
+    cv2.imwrite("mode_postprocessing.png", bw_mean_thresh_filter)
 
-    cv2.imshow('Black white image', blackAndWhiteImage)
-    cv2.imshow('Black white image', calculate_bitwise_or(img_data))
-    """
+    bw_mode_thresh_filter = 255 - bw_mode_thresh
+    cv2.filterSpeckles(bw_mode_thresh_filter, 255, 1, 1)
+    cv2.filterSpeckles(mode, 255, 1, 1)
+    cv2.imwrite("bw_mode_thresh_filter.png", bw_mode_thresh_filter)
+    cv2.imwrite("mode_speckless.png", mode)
+
+    template_grey = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+    cv2.filterSpeckles(template_grey, 255, 1000, 2000)
+    cv2.imwrite("template_clean.png", template_grey)
