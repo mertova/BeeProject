@@ -1,7 +1,4 @@
 # Sensitive data ignore
-data/scans/*
-data/results/*
-data/templates/*
 
 # idea files
 .idea/*
@@ -35,6 +32,8 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# virtual env
+venv/
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
