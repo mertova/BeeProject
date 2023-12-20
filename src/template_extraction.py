@@ -8,7 +8,7 @@ example_blue = cv2.imread("../data/scans/png/Niedersach_examples_50/03_LHI_obser
                           "-23_03_LHI_observation_reports_2000-23-1.png")
 documents_dir = '../data/scans/png/Niedersach_examples_50/'
 template = cv2.imread('../data/templates/template.png')
-transformed_dir = '../data/results/transformed1/'
+transformed_dir = '../data/results/transformed/'
 example_file = cv2.imread('../data/scans/png/Niedersach_examples_50/'
                           '03_LHI_observation_reports_2000-47_03_LHI_observation_reports_2000-47-1.png')
 

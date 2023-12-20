@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 
-transformed_dir = '../data/results/transformed1/'
+transformed_dir = '../data/results/transformed/'
 
 
 def flann_matches(descr_img, descr_ref):
