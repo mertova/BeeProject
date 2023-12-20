@@ -1,79 +1,82 @@
-from cv2 import cv2
+import cv2
 import numpy as np
-from shapely.geometry import LineString, box, Point
-
-
-# extend line to the borders of the image
-def infinite_line(line: LineString, maxy: int, maxx: int):
-    minx = 0
-    miny = 0
-    bounding_box = box(minx, miny, maxx, maxy)
-    a, b = line.xy
-    if a[0] == b[0]:  # vertical line
-        extended_line = LineString([(a[0], a[0]), (miny, maxy)])
-    elif a[1] == b[1]:  # horizontal line
-        extended_line = LineString([(minx, maxx), (a[1], a[1])])
-    else:
-        # linear equation: y = k*x + m
-        k = (b[1] - a[1]) / (b[0] - a[0])
-        m = a[1] - k * a[0]
-        y0 = k * minx + m
-        y1 = k * maxx + m
-        x0 = (miny - m) / k
-        x1 = (maxy - m) / k
-        points_on_boundary_lines = [Point(minx, maxx), Point(y0, y1),
-                                    Point(x0, x1), Point(miny, maxy)]
-        points_sorted_by_distance = sorted(points_on_boundary_lines, key=bounding_box.distance)
-        extended_line = LineString(points_sorted_by_distance[:2])
-    return
+from shapely.geometry import LineString, Point
 
 
 # x,y coordinates of the intersection of two input lines
 # false if no intersection (determinant == 0)
-def calculate_intersections(lines: list[LineString]):
-    result_points = set()
-
-    for line1 in lines:
-        for line2 in lines:
-            int_pt = line1.intersection(line2)
-            if type(int_pt) == Point:
-                result_points.add((int(int_pt.x), int(int_pt.y)))
-
+def calculate_intersections(horizontal: list[LineString], vertical: list[LineString])-> list[list[(int, int)]]:
+    if vertical is None or horizontal is None:
+        return []
+    result_points = []
+    horizontal_points = []
+    for h in horizontal:
+        for v in vertical:
+            int_pt = h.intersection(v)
+            if type(int_pt) is Point:
+                horizontal_points.append((int(int_pt.x), int(int_pt.y)))
+        result_points.append(horizontal_points)
+        horizontal_points = []
     return result_points
 
 
-# todo
-def calculate_middle_line(line1: LineString, line2: LineString) -> LineString:
-    first1, last1 = line1.xy
-    first2, last2 = line2.xy
-
-    if abs(first1[0] - first2[0]) < abs(first1[0] - last2[0]):
-        x1 = min(first1[0], first2[0]) + abs(first1[0] - first2[0]) / 2
+def create_cut(points: set[tuple], horizontal: bool, img_shape: tuple):
+    cut_lines = []
+    if horizontal:
+        for point in points:
+            cut_lines.append(LineString([(point[0], point[1]), (img_shape[1], point[1])]))
     else:
-        x1 = min(first1[0], last2[0]) + abs(first1[0] - last2[0]) / 2
+        for point in points:
+            cut_lines.append(LineString([(point[0], point[1]), (point[0], img_shape[0])]))
 
-    if abs(first1[1] - first2[1]) < abs(first1[1] - last2[1]):
-        y1 = min(first1[1], first2[1]) + abs(first1[1] - first2[1]) / 2
-    else:
-        y1 = min(first1[1], last2[1]) + abs(first1[1] - last2[1]) / 2
-
-    if abs(last1[0] - first2[0]) < abs(last1[0] - last2[0]):
-        x2 = min(last1[0] - first2[0]) + abs(last1[0] - first2[0]) / 2
-    else:
-        x2 = min(last1[0], last2[0]) + abs(last1[0] - last2[0]) / 2
-
-    if abs(last1[1] - first2[1]) < abs(last1[1] - last2[1]):
-        y2 = min(last1[1], first2[1]) + abs(last1[1] - first2[1]) / 2
-    else:
-        y2 = min(last1[1], last2[1]) + abs(last1[1] - last2[1]) / 2
-
-    return LineString([[x1, y1], [x2, y2]])
+    return cut_lines
 
 
 # write lines to the image
-def write_lines(image, lines: list[LineString]):
+def write_lines(image, lines: list, color):
+    if lines is None:
+        return image
     for line in lines:
-        first, last = line.xy
-        cv2.line(image, (int(first[0]), int(last[0])), (int(first[1]), int(last[1])), (255, 0, 0), 2)
-
+        if type(line) is tuple:
+            pt1, pt2 = line
+            cv2.line(image, pt1, pt2, color, 4)
+        elif type(line) is LineString:
+            # pt1 = tuple(map(int, line.xy[0]))
+            # pt2 = tuple(map(int, line.xy[1]))
+            pt1 = (int(line.xy[0][0]), int(line.xy[1][0]))
+            pt2 = (int(line.xy[0][1]), int(line.xy[1][1]))
+            cv2.line(image, pt1, pt2, color, 4)
     return image
+
+
+def two_infinite_lines_intersection(line1, line2, width, height):
+    p1_start = np.asarray(line1[0])
+    p1_end = np.asarray(line1[1])
+    p2_start = np.asarray(line2[0])
+    p2_end = np.asarray(line2[1])
+
+    r = (p1_end - p1_start)
+    s = (p2_end - p2_start)
+    c1 = np.cross(r, s)
+    c2 = np.cross(p2_start - p1_start, s)
+    if c1 == 0:
+        return None
+    t = c2 / c1
+    x = p1_start[0] + r[0] * t
+    y = p1_start[1] + r[1] * t
+    i = (int(x), int(y))
+    if i is not None and 0 <= i[0] <= width and 0 <= i[1] <= height:
+        return i[0], i[1]
+    return None
+
+
+def create_lines_from_points(points1: list[int], points2: list[int], horizontal, max_val) -> list[LineString]:
+    if len(points1) != len(points2):
+        raise ValueError('points are not matching')
+    optimal_lines = []
+    for i in range(len(points1)):
+        if horizontal:
+            optimal_lines.append(LineString([[0, int(points1[i])], [max_val, int(points2[i])]]))
+        else:
+            optimal_lines.append(LineString([[int(points1[i]), 0], [int(points2[i]), max_val]]))
+    return optimal_lines

@@ -44,5 +44,5 @@ venv/
 pip-log.txt
 pip-delete-this-directory.txt
 
-src/archive/
+src/archive
 data/archive/

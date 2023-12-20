@@ -1,34 +1,50 @@
-from cv2 import cv2
-from shapely.geometry import Point
-from sklearn.cluster import KMeans
+import cv2
 import numpy as np
 
 
-def kmeans_xy(points: set[tuple]):
-    xset = set()
-    yset = set()
+# Cluster a set of numbers based on the distance from each other
+def cluster_numbers(numbers: [], eps):
+    if numbers is None or len(numbers) < 2:
+        return None
+    numbers.sort()
+    print(numbers)
+    distances = []
+    for i in range(len(numbers) - 1):
+        distances.append(numbers[i+1] - numbers[i])
+    print(distances)
+    clusters = []
+    first = numbers.pop(0)
+    cluster = [first]
+    while len(numbers) > 0:
+        if first - eps < numbers[0] < first + eps:
+            cluster.append(numbers.pop(0))
+        else:
+            clusters.append(cluster)
+            first = numbers.pop(0)
+            cluster = [first]
+    return clusters
+
+
+def clustering_eps(points, eps):
+    clusters = []
+    points_sorted = sorted(points)
+
+    curr_point = points_sorted[0]
+    curr_cluster = [curr_point]
+    for point in points_sorted[1:]:
+        if curr_point - eps <= point <= curr_point + eps:
+            curr_cluster.append(point)
+        else:
+            clusters.append(np.median(curr_cluster))
+            curr_cluster = [point]
+        curr_point = point
+    clusters.append(np.median(curr_cluster))
+    print(clusters)
+    return clusters
+
+
+def write_points(image, points: list[tuple], color: tuple):
     for point in points:
-        xset.add(point[0])
-        yset.add(point[1])
-
-    xdata = np.array(list(xset))
-    ydata = np.array(list(yset))
-    kmeansx = KMeans(n_clusters=12).fit(xdata.reshape(-1, 1))
-    kmeansx.predict(xdata.reshape(-1, 1))
-
-    kmeansy = KMeans(n_clusters=38).fit(ydata.reshape(-1, 1))
-    kmeansy.predict(ydata.reshape(-1, 1))
-
-    x_centers = set()
-    for item in kmeansx.cluster_centers_:
-        x_centers.add((int(item[0]), 0))
-    y_centers = set()
-    for item in kmeansy.cluster_centers_:
-        y_centers.add((0, int(item[0])))
-    return x_centers, y_centers
-
-
-def write_points(image, points: set[tuple], color):
-    for point in points:
-        cv2.circle(image, (point[0], point[1]), radius=5, color=color, thickness=-1)
+        if point is not None:
+            cv2.circle(image, (point[0], point[1]), radius=5, color=color, thickness=-1)
     return image

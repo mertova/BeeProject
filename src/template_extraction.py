@@ -3,7 +3,7 @@ import numpy as np
 import glob
 import sift_transformator as st
 
-results_dir = '../data/results/extracting_template_out/results3/'
+results_dir = '../data/results/extracting_template/results3/'
 example_blue = cv2.imread("../data/scans/png/Niedersach_examples_50/03_LHI_observation_reports_2000"
                           "-23_03_LHI_observation_reports_2000-23-1.png")
 documents_dir = '../data/scans/png/Niedersach_examples_50/'
