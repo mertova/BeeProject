@@ -5,7 +5,7 @@ from shapely.geometry import LineString, Point
 
 # x,y coordinates of the intersection of two input lines
 # false if no intersection (determinant == 0)
-def calculate_intersections(horizontal: list[LineString], vertical: list[LineString])-> list[list[(int, int)]]:
+def calculate_intersections(horizontal: list[LineString], vertical: list[LineString]) -> list[list[(int, int)]]:
     if vertical is None or horizontal is None:
         return []
     result_points = []
@@ -18,18 +18,6 @@ def calculate_intersections(horizontal: list[LineString], vertical: list[LineStr
         result_points.append(horizontal_points)
         horizontal_points = []
     return result_points
-
-
-def create_cut(points: set[tuple], horizontal: bool, img_shape: tuple):
-    cut_lines = []
-    if horizontal:
-        for point in points:
-            cut_lines.append(LineString([(point[0], point[1]), (img_shape[1], point[1])]))
-    else:
-        for point in points:
-            cut_lines.append(LineString([(point[0], point[1]), (point[0], img_shape[0])]))
-
-    return cut_lines
 
 
 # write lines to the image
@@ -80,3 +68,13 @@ def create_lines_from_points(points1: list[int], points2: list[int], horizontal,
         else:
             optimal_lines.append(LineString([[int(points1[i]), 0], [int(points2[i]), max_val]]))
     return optimal_lines
+
+
+def draw_lines(points1, points2, horizontal, width, height):
+    if points1 is None or points2 is None or len(points1) != len(points2):
+        return []
+    if horizontal:
+        sorted_lines = create_lines_from_points(points1, points2, horizontal, width)
+    else:
+        sorted_lines = create_lines_from_points(points1, points2, horizontal, height)
+    return sorted_lines

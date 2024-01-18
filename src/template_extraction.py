@@ -1,100 +1,54 @@
 import cv2
-import numpy as np
-import glob
-import sift_transformator as st
-
-results_dir = '../data/results/extracting_template/results3/'
-example_blue = cv2.imread("../data/scans/png/Niedersach_examples_50/03_LHI_observation_reports_2000"
-                          "-23_03_LHI_observation_reports_2000-23-1.png")
-documents_dir = '../data/scans/png/Niedersach_examples_50/'
-template = cv2.imread('../data/templates/template.png')
-transformed_dir = '../data/results/transformed/'
-example_file = cv2.imread('../data/scans/png/Niedersach_examples_50/'
-                          '03_LHI_observation_reports_2000-47_03_LHI_observation_reports_2000-47-1.png')
+from classes.reference import Reference
+from classes.template import Template
+from utils import picture_utils, sift_transformator
+from pathlib import Path
 
 
-def load_data(path):
-    images = glob.glob(path)
-    image_data = []
-    for pic in images:
-        image_data.append(cv2.imread(pic, cv2.IMREAD_GRAYSCALE))
-    return image_data
+def transform_dataset_grey(reference_grey: cv2.Mat, data_sample_dir: Path, template_out_dir: Path):
+    print("loading images from {}".format(data_sample_dir), "\n")
+    images = picture_utils.load_data_grey(data_sample_dir)
 
-
-# H: 0-179, S: 0-255, V: 0-255
-def extract_template_pen_elimination(img):
-    cv2.imwrite(results_dir + "frame.png", img)
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-
-    # define range of blue color in HSV
-    lower_blue = np.array([85, 0, 50], np.uint8)
-    upper_blue = np.array([150, 255, 255], np.uint8)
-
-    # Threshold the HSV image to get only blue colors
-    mask = cv2.inRange(hsv, lower_blue, upper_blue)
-
-    # Bitwise-AND mask and original image
-    mask_inverse = cv2.bitwise_not(mask)
-    cv2.imwrite(results_dir + "mask_inverse.png", mask_inverse)
-    cv2.filterSpeckles(mask_inverse, 255, 50, 2000)
-
-    mask_speckless = cv2.bitwise_not(mask_inverse)
-    cv2.imwrite(results_dir + "speckless_img.png", mask_speckless)
-
-    grey_template = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    res = cv2.bitwise_and(grey_template, grey_template, mask=mask_inverse)
-    cv2.imwrite(results_dir + "res0.png", res)
-    res = res + mask_speckless
-    cv2.filterSpeckles(res, 255, 1000, 2000)
-    cv2.imwrite(results_dir + "res.png", res)
-
-    return res
-
-
-# calculate average from the input set of images
-# returns image
-def calculate_average_img(image_data):
-    avg_image = image_data[0]
-    for i in range(len(image_data)):
-        if i == 0:
-            pass
-        else:
-            alpha = 1.0 / (i + 1)
-            beta = 1.0 - alpha
-            avg_image = cv2.addWeighted(image_data[i], alpha, avg_image, beta, 0.0)
-    return avg_image
-
-
-def extract_template_averaging(images):
     if images is None or len(images) == 0:
-        print("empty directory of images")
+        print("empty directory of source images\n")
         return
 
-    average = calculate_average_img(images)
-    cv2.imwrite(results_dir + "average.png", average)
-    gamma_correction(average, 5)
+    transform_dir = template_out_dir / "transformed"
+    transform_dir.mkdir(exist_ok=True)
+    i = 0
+    print("transforming images ... \n")
+    for img in images:
+        transformed = sift_transformator.map_img_to_ref(img.copy(), reference_grey)
+        img_path = transform_dir / (i.__str__() + ".png")
+        cv2.imwrite(img_path.as_posix(), transformed)
+        print("transformed image {}\n".format(img_path.as_posix()))
+        i += 1
+    print("\ntransformed all images\n")
 
 
-def gamma_correction(img, pixel_val):
-    # Define parameters.
-    r1 = 100
-    s1 = 0
-    r2 = 210
-    s2 = 255
+def extract_template(reference: Reference, data_samples_dir: Path, results_dir: Path, template_name: str):
+    images = picture_utils.load_data_grey(data_samples_dir)
 
-    # Vectorize the function to apply it to each value in the Numpy array.
-    pixel_val_vec = np.vectorize(pixel_val)
+    if images is None or len(images) == 0:
+        print("empty directory of images\n")
+        return
 
-    # Apply contrast stretching.
-    contrast_stretched = pixel_val_vec(img, r1, s1, r2, s2)
+    images.append(reference.image_grey)
 
-    # Save edited image.
-    cv2.imwrite(results_dir + 'contrast_stretch.png', contrast_stretched)
+    # todo finish for some templates it might be essential
+    subt = picture_utils.calculate_subtracted_img(images)
+    cv2.imwrite(results_dir.as_posix() + "subtr.png", subt)
 
+    average = picture_utils.calculate_average_img(images)
+    cv2.imwrite(results_dir.as_posix() + "average.png", average)
 
-if __name__ == '__main__':
-    # extract_template_pen_elimination(example_blue)
-    template_grey = cv2.cvtColor(example_file, cv2.COLOR_BGR2GRAY)
-    st.transform_dataset_grey(load_data(documents_dir + "*.png"), template_grey)
-    transformed_images = load_data(transformed_dir + "*.png")
-    extract_template_averaging(transformed_images)
+    subt_image = cv2.bitwise_not(images[0])
+    thresh, bw_mean_thresh = cv2.threshold(subt_image, 60, 255, cv2.THRESH_TOZERO)
+    bw_mean_thresh_filter = 255 - bw_mean_thresh
+
+    cv2.filterSpeckles(bw_mean_thresh_filter, 255, 10, 2000)
+    cv2.imwrite(results_dir.as_posix() + "bw_mean_thresh_speckles.png", bw_mean_thresh_filter)
+
+    template_clean = picture_utils.gamma_correction(bw_mean_thresh_filter)
+    cv2.imwrite(results_dir.as_posix() + template_name, template_clean)
+    return Template(template_name, results_dir / template_name, template_clean)

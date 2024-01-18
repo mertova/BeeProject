@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
-
-transformed_dir = '../data/results/transformed/'
+from utils import picture_utils
+from pathlib import Path
 
 
 def flann_matches(descr_img, descr_ref):
@@ -54,7 +54,7 @@ def map_img_to_ref(image, ref_image, method=cv2.RANSAC, ransac_thresh=5.0, min_m
     # Computing the transformation from the reference image to the image
     transform_mat = cv2.findHomography(img_pts, ref_pts, method, ransac_thresh)[0]
 
-    # Specifying the size of the resulting transformed image
+    # Specifying the size of the resulting transformed-LHI image
     # Here: using size the of the reference image
     ref_cols, ref_rows = ref_image.shape
     dsize = (ref_rows, ref_cols)
@@ -63,15 +63,3 @@ def map_img_to_ref(image, ref_image, method=cv2.RANSAC, ransac_thresh=5.0, min_m
     return transformed
 
 
-def transform_dataset_grey(images, template_grey):
-    if images is None or len(images) == 0:
-        print("empty directory of images")
-        return
-    gray_transformed = []
-    i = 0
-    for img in images:
-        transformed = map_img_to_ref(img.copy(), template_grey)
-        cv2.imwrite(transformed_dir + i.__str__() + ".png", transformed)
-        gray_transformed.append(transformed)
-        i += 1
-    print("transformed all images")
