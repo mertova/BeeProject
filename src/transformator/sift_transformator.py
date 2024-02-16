@@ -1,7 +1,7 @@
+from pathlib import Path
+
 import numpy as np
 import cv2
-from utils import picture_utils
-from pathlib import Path
 
 
 def flann_matches(descr_img, descr_ref):
@@ -63,3 +63,24 @@ def map_img_to_ref(image, ref_image, method=cv2.RANSAC, ransac_thresh=5.0, min_m
     return transformed
 
 
+def transform_dataset(reference_grey: cv2.Mat, data_dir: Path, template_out_dir: Path):
+    print("loading images from {}".format(data_dir), "\n")
+    if data_dir is None:
+        print("Data path is None")
+        raise SystemExit(1)
+
+    p = data_dir.glob('**/*.png')
+    files = [x for x in p if x.is_file()]
+    transform_dir = template_out_dir.joinpath("transformed")
+    transform_dir.mkdir(exist_ok=True)
+    i = 0
+    print("transforming images ... \n")
+    for file in files:
+        img = cv2.imread(file.as_posix(), cv2.IMREAD_GRAYSCALE)
+        transformed = map_img_to_ref(img, reference_grey)
+        img_path = transform_dir / (i.__str__() + ".png")
+        cv2.imwrite(img_path.as_posix(), transformed)
+        print("transformed image {}\n".format(img_path.as_posix()))
+        i += 1
+    print("\ntransformed all images\n")
+    return transform_dir
