@@ -1,54 +1,93 @@
+from reference_image import Image
+
 import cv2
-from classes.reference import Reference
-from classes.template import Template
-from utils import picture_utils, sift_transformator
+import numpy as np
 from pathlib import Path
 
 
-def transform_dataset_grey(reference_grey: cv2.Mat, data_sample_dir: Path, template_out_dir: Path):
-    print("loading images from {}".format(data_sample_dir), "\n")
-    images = picture_utils.load_data_grey(data_sample_dir)
+def load_data_grey(path: Path):
+    if path is None:
+        print("Path is None")
+        raise SystemExit(1)
 
-    if images is None or len(images) == 0:
-        print("empty directory of source images\n")
-        return
-
-    transform_dir = template_out_dir / "transformed"
-    transform_dir.mkdir(exist_ok=True)
-    i = 0
-    print("transforming images ... \n")
-    for img in images:
-        transformed = sift_transformator.map_img_to_ref(img.copy(), reference_grey)
-        img_path = transform_dir / (i.__str__() + ".png")
-        cv2.imwrite(img_path.as_posix(), transformed)
-        print("transformed image {}\n".format(img_path.as_posix()))
-        i += 1
-    print("\ntransformed all images\n")
+    p = path.glob('**/*.png')
+    files = [x for x in p if x.is_file()]
+    image_data = []
+    for file in files:
+        image_data.append(cv2.imread(file.as_posix(), cv2.IMREAD_GRAYSCALE))
+    return image_data
 
 
-def extract_template(reference: Reference, data_samples_dir: Path, results_dir: Path, template_name: str):
-    images = picture_utils.load_data_grey(data_samples_dir)
+def calculate_subtracted_img(image_data):
+    subt_image = cv2.bitwise_not(image_data[0])
+    for i in range(len(image_data)):
+        if i == 0:
+            pass
+        else:
+            subt_image = subt_image - cv2.bitwise_not(image_data[i])
+    return subt_image
 
-    if images is None or len(images) == 0:
+
+# calculate average from the input set of images
+# returns image
+def calculate_average_img(image_data):
+    avg_image = image_data[0]
+    for i in range(len(image_data)):
+        if i == 0:
+            pass
+        else:
+            alpha = 1.0 / (i + 1)
+            beta = 1.0 - alpha
+            avg_image = cv2.addWeighted(image_data[i], alpha, avg_image, beta, 1.0)
+    return avg_image
+
+
+def adjust_gamma(image, gamma=1.0):
+    # build a lookup table mapping the pixel values [0, 255] to
+    # their adjusted gamma values
+    inv_gamma = 1.0 / gamma
+    table = np.array([((i / 255.0) ** inv_gamma) * 255
+                      for i in np.arange(0, 256)]).astype("uint8")
+    # apply gamma correction using the lookup table
+    return cv2.LUT(image, table)
+
+
+def pixel_val(pix, r1, s1, r2, s2):
+    if 0 <= pix <= r1:
+        return int(s1 / r1) * pix
+    elif r1 < pix <= r2:
+        return int((s2 - s1) / (r2 - r1)) * (pix - r1) + s1
+    else:
+        return int((255 - s2) / (255 - r2)) * (pix - r2) + s2
+
+
+def extract_template(reference: Image, transformed_images, results_dir: Path = None, debug: bool = False):
+    if transformed_images is None or len(transformed_images) == 0:
         print("empty directory of images\n")
-        return
+        exit(1)
+    if results_dir is None and debug is True:
+        print("result dir cannot be None with debug mode on\n")
+        exit(1)
 
-    images.append(reference.image_grey)
+    transformed_images.append(reference.image_grey)
 
-    # todo finish for some templates it might be essential
-    subt = picture_utils.calculate_subtracted_img(images)
-    cv2.imwrite(results_dir.as_posix() + "subtr.png", subt)
-
-    average = picture_utils.calculate_average_img(images)
-    cv2.imwrite(results_dir.as_posix() + "average.png", average)
-
-    subt_image = cv2.bitwise_not(images[0])
+    average = calculate_average_img(transformed_images)
+    subt_image = cv2.bitwise_not(average)
     thresh, bw_mean_thresh = cv2.threshold(subt_image, 60, 255, cv2.THRESH_TOZERO)
     bw_mean_thresh_filter = 255 - bw_mean_thresh
-
     cv2.filterSpeckles(bw_mean_thresh_filter, 255, 10, 2000)
-    cv2.imwrite(results_dir.as_posix() + "bw_mean_thresh_speckles.png", bw_mean_thresh_filter)
 
-    template_clean = picture_utils.gamma_correction(bw_mean_thresh_filter)
-    cv2.imwrite(results_dir.as_posix() + template_name, template_clean)
-    return Template(template_name, results_dir / template_name, template_clean)
+    if debug:
+        # todo finish for some templates it might be essential
+        subt = calculate_subtracted_img(transformed_images)
+        subt_dir = results_dir / "subtr.png"
+        cv2.imwrite(subt_dir.as_posix(), subt)
+
+        average_dir = results_dir / "average.png"
+        cv2.imwrite(average_dir.as_posix(), average)
+
+        mean_speckles_dir = results_dir / "bw_mean_thresh_speckles.png"
+        cv2.imwrite(mean_speckles_dir.as_posix(), bw_mean_thresh_filter)
+
+    template_clean = adjust_gamma(bw_mean_thresh_filter, 2)
+    return template_clean
