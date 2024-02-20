@@ -19,7 +19,7 @@ Source:
 |   |   ├── pdf
 |   |   └── png
 │   ├── templates  -- #digitalized templates (.xlsx - temporary)
-|   └── results    -- #outputs of different models applied on our scan examples
+|   └── ocr_results-form2    -- #outputs of different models applied on our scan examples
 |       ├── HTSNet
 |       └── Martine-DeepCurate
 ```

@@ -4,7 +4,7 @@ import cv2
 from shapely import LineString
 
 from cell import Cell
-from image import Image
+from reference_image import Image
 import json
 
 
