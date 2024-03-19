@@ -36,8 +36,9 @@ def map_img_to_ref(image, ref_image, method=cv2.RANSAC, ransac_thresh=5.0, min_m
     """
     # Initialising a SIFT-detector
     detector = cv2.SIFT.create()
-    kpts_img, descr_img = detector.detectAndCompute(image, None)
+
     kpts_ref, descr_ref = detector.detectAndCompute(ref_image, None)
+    kpts_img, descr_img = detector.detectAndCompute(image, None)
 
     # Matching of both images
     matches = flann_matches(descr_img, descr_ref)
@@ -63,7 +64,25 @@ def map_img_to_ref(image, ref_image, method=cv2.RANSAC, ransac_thresh=5.0, min_m
     return transformed
 
 
-def transform_dataset(reference_grey: cv2.Mat, data_dir: Path, template_out_dir: Path):
+# todo loading file differently -> might overflow memory
+def transform_files_in_memory(reference_grey: cv2.Mat, data_dir: Path):
+    files = load_png_files(data_dir)
+    transform_dir = data_dir / "transformed"
+    transform_dir.mkdir(parents=True, exist_ok=True)
+    i = 0
+    print("transforming images ... \n")
+    for file in files:
+        img = cv2.imread(file.as_posix(), cv2.IMREAD_GRAYSCALE)
+        transformed = map_img_to_ref(img, reference_grey)
+
+        img_path = transform_dir / (i.__str__() + ".png")
+        cv2.imwrite(img_path.as_posix(), transformed)
+        print("transformed image {}\n".format(file.as_posix()))
+        i += 1
+    return transform_dir
+
+
+def load_png_files(data_dir: Path):
     print("loading images from {}".format(data_dir), "\n")
     if data_dir is None:
         print("Data path is None")
@@ -71,16 +90,4 @@ def transform_dataset(reference_grey: cv2.Mat, data_dir: Path, template_out_dir:
 
     p = data_dir.glob('**/*.png')
     files = [x for x in p if x.is_file()]
-    transform_dir = template_out_dir.joinpath("transformed")
-    transform_dir.mkdir(exist_ok=True)
-    i = 0
-    print("transforming images ... \n")
-    for file in files:
-        img = cv2.imread(file.as_posix(), cv2.IMREAD_GRAYSCALE)
-        transformed = map_img_to_ref(img, reference_grey)
-        img_path = transform_dir / (i.__str__() + ".png")
-        cv2.imwrite(img_path.as_posix(), transformed)
-        print("transformed image {}\n".format(img_path.as_posix()))
-        i += 1
-    print("\ntransformed all images\n")
-    return transform_dir
+    return files
