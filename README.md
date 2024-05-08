@@ -18,7 +18,7 @@ Source:
 │   ├── scans      -- #examples of scaned documents in different formats
 |   |   ├── pdf
 |   |   └── png
-│   ├── templates  -- #digitalized templates (.xlsx - temporary)
+│   ├── form1  -- #digitalized form1 (.xlsx - temporary)
 |   └── ocr_results-form2    -- #outputs of different models applied on our scan examples
 |       ├── HTSNet
 |       └── Martine-DeepCurate
