@@ -6,7 +6,7 @@ from table.cell import Cell
 from table.template import Template
 
 
-class Grid:
+class Table:
     def __init__(self, template: Template = None, cells: list[Cell] = None, shape: tuple = None):
         self.template = template
         self.cells = cells
