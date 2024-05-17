@@ -8,6 +8,9 @@ class Vertex:
             return True
         return False
 
+    def as_tuple(self):
+        return self.x, self.y
+
     def __str__(self):
         return f'({self.x}, {self.y})'
 
