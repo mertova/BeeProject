@@ -1,8 +1,9 @@
 from pathlib import Path
 import json
 import cv2
-from cell import Cell
-from transformator.template import Template
+
+from classes.cell import Cell
+from classes.template import Template
 
 
 class Table:
@@ -43,21 +44,13 @@ class Table:
 
     def render(self, include_canvas: bool = False):
         """
-        TODO
         Render the grid cells to the template
         :param include_canvas: if template image should be used as a background
         """
         canvas = self.get_canvas(include_canvas)
-        rec_color = (0, 255, 60)
-        text_color = (200, 0, 60)
-        if self.cells is not None:
-            for cell in self.cells:
-                pt1 = cell.pt1
-                pt2 = cell.pt2
-                canvas = cv2.rectangle(canvas, pt1, pt2, rec_color, 2)
-                canvas = cv2.putText(canvas, str(cell), pt1,
-                                     cv2.FONT_HERSHEY_SIMPLEX, 1, text_color,
-                                     2, cv2.LINE_AA, False)
+        if self._cells is not None:
+            for cell in self._cells:
+                cell.render(canvas, cell.id)
         return canvas
 
     def get_canvas(self, include_canvas: bool = False):
