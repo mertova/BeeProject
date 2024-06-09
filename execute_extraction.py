@@ -1,15 +1,15 @@
 import argparse
 from pathlib import Path
 
-from extraction.grid import Grid
-from extraction.grid_extraction import GridExtraction
-from extraction.template import Template
-from extraction.template_extraction import TemplateExtraction
+from table.table import Table
+from table_extraction import GridExtraction
+from image_processing.reference import Reference
+from form_analysis import FormAnalysis
 
 
 def main(path_t_output: str, path_reference: str, eps_h: int, eps_v: int, template_extraction: bool = False,
          path_data_sample: str = None, data_limit: int = None,
-         transform: bool = False, debug: bool = False) -> tuple[Template, Grid]:
+         transform: bool = False, debug: bool = False) -> tuple[Reference, Table]:
     out_dir = Path(path_t_output)
     if not out_dir.exists():
         print("The output directory doesn't exist.\n")
@@ -20,7 +20,7 @@ def main(path_t_output: str, path_reference: str, eps_h: int, eps_v: int, templa
         print("The path to the reference file is not valid or doesn't exist.\n")
         raise exit(1)
 
-    t_extr = TemplateExtraction(out_dir, reference_dir)
+    t_extr = FormAnalysis(out_dir, reference_dir)
     if template_extraction:
         print("Processing with template extraction ... ")
         data_sample_dir = Path(path_data_sample)
@@ -30,9 +30,9 @@ def main(path_t_output: str, path_reference: str, eps_h: int, eps_v: int, templa
 
         # extract template
         template = t_extr.extract(data_sample_dir, data_limit, transform=transform, debug=debug)
-        template.dump_template()
+        template.render()
     else:
-        template = t_extr.get_template_from_reference()
+        template = t_extr.get_reference()
 
     if template is None:
         print("Template not found")
@@ -41,8 +41,8 @@ def main(path_t_output: str, path_reference: str, eps_h: int, eps_v: int, templa
     # todo type check of eps
     g_extr = GridExtraction(out_dir, eps_h, eps_v, template=template)
     grid = g_extr.extract(debug)
-    grid.export_json(out_dir)
-    return template, grid
+    grid.export_dict(out_dir)
+    return grid
 
 
 if __name__ == '__main__':
