@@ -1,25 +1,62 @@
-from pathlib import Path
-
 import numpy as np
 import cv2
 
 from geometry.line import Line
+from geometry.vertex import Vertex
 from image_processing.image import Image
 
 
 class Form(Image):
-    path: Path
+    _height: int
+    _width: int
 
-    height: int = None
-    width: int = None
-    border_lines = None
+    _up_left: Vertex
+    _up_right: Vertex
+    _down_left: Vertex
+    _down_right: Vertex
 
-    def __init__(self, image_path: str):
-        super().__init__(cv2.imread(image_path))
-        self.path = Path(image_path)
-        super()._set_inverse()
+    _border_up: Line
+    _border_down: Line
+    _border_left: Line
+    _border_right: Line
+
+    def __init__(self, image: str):
+        super().__init__(image)
+        self._set_dimensions()
+
+    def _set_dimensions(self):
+        """
+        set dimensions of the form image: width, height, 4 corner points and 4 borderlines from the sape of the image
+        """
+        self.height, self.width = self._grey.shape
+
+        self._up_left = Vertex(0, 0)
+        self._up_right = Vertex(self.width, 0)
+        self._down_left = Vertex(0, self.height)
+        self._down_right = Vertex(self.width, self.height)
+
+        self._border_up = Line(self._up_left, self._up_right)
+        self._border_down = Line(self._down_left, self._down_right)
+        self._border_left = Line(self._up_left, self._down_left)
+        self._border_right = Line(self._up_right, self._down_right)
+
+    def get_border_up(self):
+        return self._border_up
+
+    def get_border_down(self):
+        return self._border_down
+
+    def get_border_left(self):
+        return self._border_left
+
+    def get_border_right(self):
+        return self._border_right
 
     def line_scanner_hough(self):
+        """
+        Hough line scanner
+        :return: List of geometry.line.Line
+        """
         lines = cv2.HoughLinesP(
             self._inverse,  # Input edge image
             cv2.HOUGH_PROBABILISTIC,
@@ -34,24 +71,10 @@ class Form(Image):
         for edges in lines:
             # Extracted points nested in the list
             x1, y1, x2, y2 = edges[0]
-            lines_list.append(Line([(x1, y1), (x2, y2)]))
+            v1 = Vertex(x1, y1)
+            v2 = Vertex(x2, y2)
+            lines_list.append(Line(v1, v2))
         return lines_list
 
-    def set_dimensions(self):
-        self.height, self.width = self._grey.shape
-
-    def set_borders(self):
-        """
-        todo
-        creates 4 borderlines from the sape of the image
-        :return:
-        """
-        up_left = [0, 0]
-        up_right = [self.width, 0]
-        down_left = [0, self.height]
-        down_right = [self.width, self.height]
-        self.borders = [Line([up_left, up_right]), Line([down_left, down_right]),
-                        Line([up_left, down_left]), Line([up_right, down_right])]
-
-    def render_form(self):
-        self.render(self.path.as_posix(), False)
+    def render_form(self, path: str):
+        self.render(path, False)
