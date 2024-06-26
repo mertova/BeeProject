@@ -1,9 +1,7 @@
 from pathlib import Path
 import json
-import cv2
 
-from classes.cell import Cell
-from classes.template import Template
+from src.table.cell import Cell
 
 
 class Table:
@@ -28,12 +26,12 @@ class Table:
         output_file = output_dir / "grid.json"
         output = {'template': self.template_path, 'shape': self.shape, 'cells': []}
         for cell in self._cells:
-            output['cells'].append(cell.export_dict())
+            output['cells'].append(cell.__dict__())
         with open(output_file, 'w') as f:
             json.dump(output, f, sort_keys=True, indent=4)
 
     def import_json(self, grid_json: dict):
-        self.template_path = Template(grid_json['template'])
+        self.template_path = grid_json['template']
         self.shape = tuple(grid_json['shape'])
         cells = []
         for cell_json in grid_json['cells']:
@@ -42,30 +40,26 @@ class Table:
             cells.append(cell)
         self._cells = cells
 
-    def render(self, include_canvas: bool = False):
+    def render(self, include_canvas: bool, canvas=None):
         """
         Render the grid cells to the template
+        :param canvas:
         :param include_canvas: if template image should be used as a background
         """
-        canvas = self.get_canvas(include_canvas)
+        if not include_canvas:
+            canvas = (canvas.copy() * 0) + 255
         if self._cells is not None:
             for cell in self._cells:
-                cell.render(canvas, cell.id)
+                canvas = cell.render(canvas)
         return canvas
-
-    def get_canvas(self, include_canvas: bool = False):
-        img = cv2.imread(self.template_path)
-        if include_canvas:
-            return img.copy()
-        return (img.copy() * 0) + 255
 
     def __str__(self):
         self._cells.sort()
         result = f"Grid( \n"
-        row = 0
+        col = 0
         for cell in self._cells:
-            if row != cell.row_id:
+            if col != cell.col_id:
                 result += "\n"
-                row = cell.row_id
-            result += str(cell) + ' '
+                col = cell.col_id
+            result += str(cell) + ', '
         return result

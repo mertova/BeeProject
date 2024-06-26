@@ -1,12 +1,17 @@
-import cv2
 import numpy as np
 
 
-# Cluster a set of numbers based on the distance from each other
-def clustering_eps(points, eps):
+def cluster(numbers: list, eps):
+    """
+    Cluster a set of numbers based on the distance from each other
+    :param numbers: numbers to be clustered
+    :param eps: allowed distance from each other
+    :return: clusters, list of lists of numbers
+    """
+    if numbers is None or len(numbers) == 0:
+        return None
     clusters = []
-    points_sorted = sorted(points)
-
+    points_sorted = sorted(numbers)
     curr_point = points_sorted[0]
     curr_cluster = [curr_point]
     for point in points_sorted[1:]:
@@ -17,12 +22,5 @@ def clustering_eps(points, eps):
             curr_cluster = [point]
         curr_point = point
     clusters.append(np.median(curr_cluster))
-    print(clusters)
     return clusters
 
-
-def write_points(image, points: list[tuple], color: tuple):
-    for point in points:
-        if point is not None:
-            cv2.circle(image, (point[0], point[1]), radius=5, color=color, thickness=-1)
-    return image
