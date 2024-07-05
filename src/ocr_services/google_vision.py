@@ -5,6 +5,19 @@ from geometry.vertex import Vertex
 from src.table.annotations import OcrAnnotation
 
 
+def _process_output(response) -> list[OcrAnnotation]:
+    annotations = []
+    for page in response.full_text_annotation.pages:
+        for block in page.blocks:
+            for paragraph in block.paragraphs:
+                for word in paragraph.words:
+                    for symbol in word.symbols:
+                        pt1 = Vertex(symbol.bounding_box.vertices[0].x, symbol.bounding_box.vertices[0].y)
+                        pt2 = Vertex(symbol.bounding_box.vertices[2].x, symbol.bounding_box.vertices[2].y)
+                        annotations.append(OcrAnnotation(pt1, pt2, symbol.text, symbol.confidence))
+    return annotations
+
+
 class GoogleVision:
     def __init__(self, key_path):
         # Authenticate with Google Cloud using the key file
@@ -21,16 +34,4 @@ class GoogleVision:
                 "{}\nFor more info on error messages, check: "
                 "https://cloud.google.com/apis/design/errors".format(response.error.message)
             )
-
-        # todo separate
-        annotations = []
-        for page in response.full_text_annotation.pages:
-            for block in page.blocks:
-                for paragraph in block.paragraphs:
-                    for word in paragraph.words:
-                        for symbol in word.symbols:
-                            pt1 = Vertex(symbol.bounding_box.vertices[0].x, symbol.bounding_box.vertices[0].y)
-                            pt2 = Vertex(symbol.bounding_box.vertices[2].x, symbol.bounding_box.vertices[2].y)
-                            annotations.append(OcrAnnotation(pt1, pt2, symbol.text, symbol.confidence))
-        return annotations
-
+        return _process_output(response)
