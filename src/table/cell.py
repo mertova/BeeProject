@@ -20,6 +20,7 @@ def encode_index(col, row):
 class Cell(Rectangle):
     """
     Represents a region of interest - classes cell - that was found in the template
+    Text inherited from Rectangle is encoded index - row and column ids
     """
     row_id: int
     col_id: int
@@ -36,14 +37,13 @@ class Cell(Rectangle):
         dictionary representation of the cell
         :return Returns a string representation (-json) of the coords and identifier
         """
-        return {'id': self.text, 'pt1': self.pt1.__dict__(), 'pt2': self.pt2.__dict__()}
+        return {'text': self.text, 'pt1': self.pt1.__dict__(), 'pt2': self.pt2.__dict__()}
 
     def import_json(self, json_dict):
-        self.text = json_dict['id']
-        self.pt1 = Vertex(json_dict['pt1'][0], json_dict['pt1'][1])
-        self.pt2 = Vertex(json_dict['pt2'][0], json_dict['pt2'][1])
+        self.text = json_dict['text']
+        self.pt1 = Vertex(json_dict['pt1']['x'], json_dict['pt1']['y'])
+        self.pt2 = Vertex(json_dict['pt2']['y'], json_dict['pt2']['y'])
         self.col_id, self.row_id = decode_index(self.text)
-        self.row_id = int(json_dict['id_row'])
 
     def activate_cell(self):
         self.is_active = True

@@ -1,0 +1,664 @@
+{
+    "google": [
+        {
+            "cell": "F3",
+            "confidence": 0.2786569595336914,
+            "text": "2"
+        },
+        {
+            "cell": "F4",
+            "confidence": 0.494584858417511,
+            "text": "0"
+        },
+        {
+            "cell": "F5",
+            "confidence": 0.7349002361297607,
+            "text": "0"
+        },
+        {
+            "cell": "F6",
+            "confidence": 0.7832852005958557,
+            "text": "09"
+        },
+        {
+            "cell": "F7",
+            "confidence": 0.7308669090270996,
+            "text": "3"
+        },
+        {
+            "cell": "F8",
+            "confidence": 0.6865841262042522,
+            "text": "-4"
+        },
+        {
+            "cell": "F9",
+            "confidence": 0.8928592503070831,
+            "text": "-1"
+        },
+        {
+            "cell": "F10",
+            "confidence": 0.9744957685470581,
+            "text": "4"
+        },
+        {
+            "cell": "F11",
+            "confidence": 0.687324047088623,
+            "text": "1"
+        },
+        {
+            "cell": "F12",
+            "confidence": 0.8039577901363373,
+            "text": "-2"
+        },
+        {
+            "cell": "F13",
+            "confidence": null,
+            "text": ""
+        },
+        {
+            "cell": "F14",
+            "confidence": 0.8751155734062195,
+            "text": "-3"
+        },
+        {
+            "cell": "F15",
+            "confidence": 0.9724257588386536,
+            "text": "5"
+        },
+        {
+            "cell": "F16",
+            "confidence": null,
+            "text": ""
+        },
+        {
+            "cell": "F17",
+            "confidence": 0.9804490208625793,
+            "text": "4"
+        },
+        {
+            "cell": "F18",
+            "confidence": 0.9314035773277283,
+            "text": "1"
+        },
+        {
+            "cell": "F19",
+            "confidence": 0.9729762077331543,
+            "text": "5"
+        },
+        {
+            "cell": "F20",
+            "confidence": 0.9826173782348633,
+            "text": "4"
+        },
+        {
+            "cell": "F21",
+            "confidence": 0.7286515831947327,
+            "text": "6"
+        },
+        {
+            "cell": "F22",
+            "confidence": 0.9176901578903198,
+            "text": "8"
+        },
+        {
+            "cell": "F23",
+            "confidence": 0.982230544090271,
+            "text": "4"
+        },
+        {
+            "cell": "F24",
+            "confidence": 0.5672706365585327,
+            "text": "-"
+        },
+        {
+            "cell": "F25",
+            "confidence": 0.6623312532901764,
+            "text": "47"
+        },
+        {
+            "cell": "F26",
+            "confidence": 0.6732089817523956,
+            "text": "47"
+        },
+        {
+            "cell": "F27",
+            "confidence": 0.9704549610614777,
+            "text": "11"
+        },
+        {
+            "cell": "F28",
+            "confidence": 0.8311441466212273,
+            "text": "13"
+        },
+        {
+            "cell": "F29",
+            "confidence": 0.8604328036308289,
+            "text": "3"
+        },
+        {
+            "cell": "F30",
+            "confidence": 0.9318963885307312,
+            "text": "7"
+        },
+        {
+            "cell": "F31",
+            "confidence": 0.9894036054611206,
+            "text": "10"
+        },
+        {
+            "cell": "F32",
+            "confidence": 0.6048151254653931,
+            "text": "9"
+        },
+        {
+            "cell": "F33",
+            "confidence": 0.9469900131225586,
+            "text": "10"
+        },
+        {
+            "cell": "F34",
+            "confidence": 0.9262723922729492,
+            "text": "13"
+        },
+        {
+            "cell": "F35",
+            "confidence": null,
+            "text": ""
+        },
+        {
+            "cell": "G3",
+            "confidence": 0.4860129654407501,
+            "text": ""
+        },
+        {
+            "cell": "G4",
+            "confidence": 0.537224531173706,
+            "text": ""
+        },
+        {
+            "cell": "G5",
+            "confidence": 0.854953870177269,
+            "text": "18"
+        },
+        {
+            "cell": "G6",
+            "confidence": 0.7465151026844978,
+            "text": "19"
+        },
+        {
+            "cell": "G7",
+            "confidence": 0.8353983983397484,
+            "text": "8"
+        },
+        {
+            "cell": "G8",
+            "confidence": 0.7532693445682526,
+            "text": "11"
+        },
+        {
+            "cell": "G9",
+            "confidence": 0.9875689148902893,
+            "text": "10"
+        },
+        {
+            "cell": "G10",
+            "confidence": 0.9817012846469879,
+            "text": "14"
+        },
+        {
+            "cell": "G11",
+            "confidence": 0.9763253033161163,
+            "text": "12"
+        },
+        {
+            "cell": "G12",
+            "confidence": 0.9840815663337708,
+            "text": "13"
+        },
+        {
+            "cell": "G13",
+            "confidence": null,
+            "text": ""
+        },
+        {
+            "cell": "G14",
+            "confidence": 0.8996692001819611,
+            "text": "76"
+        },
+        {
+            "cell": "G15",
+            "confidence": 0.9113190770149231,
+            "text": "10"
+        },
+        {
+            "cell": "G16",
+            "confidence": 0.906802624464035,
+            "text": "11"
+        },
+        {
+            "cell": "G17",
+            "confidence": 0.8949621319770813,
+            "text": "11"
+        },
+        {
+            "cell": "G18",
+            "confidence": 0.9863231778144836,
+            "text": "15"
+        },
+        {
+            "cell": "G19",
+            "confidence": 0.9882162809371948,
+            "text": "15"
+        },
+        {
+            "cell": "G20",
+            "confidence": 0.9869446456432343,
+            "text": "17"
+        },
+        {
+            "cell": "G21",
+            "confidence": 0.9885949790477753,
+            "text": "15"
+        },
+        {
+            "cell": "G22",
+            "confidence": 0.8125550448894501,
+            "text": "16"
+        },
+        {
+            "cell": "G23",
+            "confidence": 0.7146055102348328,
+            "text": "27"
+        },
+        {
+            "cell": "G24",
+            "confidence": null,
+            "text": ""
+        },
+        {
+            "cell": "G25",
+            "confidence": 0.9382409453392029,
+            "text": "25"
+        },
+        {
+            "cell": "G26",
+            "confidence": 0.9915137887001038,
+            "text": "25"
+        },
+        {
+            "cell": "G27",
+            "confidence": 0.7752509117126465,
+            "text": "26"
+        },
+        {
+            "cell": "G28",
+            "confidence": 0.8901473581790924,
+            "text": "12"
+        },
+        {
+            "cell": "G29",
+            "confidence": 0.988192617893219,
+            "text": "20"
+        },
+        {
+            "cell": "G30",
+            "confidence": 0.9809578061103821,
+            "text": "24"
+        },
+        {
+            "cell": "G31",
+            "confidence": 0.9223257973790169,
+            "text": "26"
+        },
+        {
+            "cell": "G32",
+            "confidence": 0.9758107960224152,
+            "text": "23"
+        },
+        {
+            "cell": "G33",
+            "confidence": 0.7903035879135132,
+            "text": "26"
+        },
+        {
+            "cell": "G34",
+            "confidence": 0.885629415512085,
+            "text": "18"
+        },
+        {
+            "cell": "G35",
+            "confidence": null,
+            "text": ""
+        },
+        {
+            "cell": "H3",
+            "confidence": 0.9871886372566223,
+            "text": "83"
+        },
+        {
+            "cell": "H4",
+            "confidence": 0.9714174568653107,
+            "text": "78"
+        },
+        {
+            "cell": "H5",
+            "confidence": 0.9886818528175354,
+            "text": "66"
+        },
+        {
+            "cell": "H6",
+            "confidence": 0.9896198511123657,
+            "text": "64"
+        },
+        {
+            "cell": "H7",
+            "confidence": 0.9913792610168457,
+            "text": "74"
+        },
+        {
+            "cell": "H8",
+            "confidence": 0.9905772507190704,
+            "text": "63"
+        },
+        {
+            "cell": "H9",
+            "confidence": 0.9701755344867706,
+            "text": "66"
+        },
+        {
+            "cell": "H10",
+            "confidence": 0.9814126789569855,
+            "text": "73"
+        },
+        {
+            "cell": "H11",
+            "confidence": 0.9905920624732971,
+            "text": "78"
+        },
+        {
+            "cell": "H12",
+            "confidence": 0.9917244017124176,
+            "text": "69"
+        },
+        {
+            "cell": "H13",
+            "confidence": null,
+            "text": ""
+        },
+        {
+            "cell": "H14",
+            "confidence": 0.6827336549758911,
+            "text": "63"
+        },
+        {
+            "cell": "H15",
+            "confidence": 0.9471924901008606,
+            "text": "82"
+        },
+        {
+            "cell": "H16",
+            "confidence": 0.9765135943889618,
+            "text": "70"
+        },
+        {
+            "cell": "H17",
+            "confidence": 0.9862691462039948,
+            "text": "73"
+        },
+        {
+            "cell": "H18",
+            "confidence": 0.8481533527374268,
+            "text": "84"
+        },
+        {
+            "cell": "H19",
+            "confidence": 0.9776564836502075,
+            "text": "66"
+        },
+        {
+            "cell": "H20",
+            "confidence": 0.9751539528369904,
+            "text": "70"
+        },
+        {
+            "cell": "H21",
+            "confidence": 0.9821316301822662,
+            "text": "74"
+        },
+        {
+            "cell": "H22",
+            "confidence": 0.9777334630489349,
+            "text": "88"
+        },
+        {
+            "cell": "H23",
+            "confidence": 0.9903937578201294,
+            "text": "66"
+        },
+        {
+            "cell": "H24",
+            "confidence": null,
+            "text": ""
+        },
+        {
+            "cell": "H25",
+            "confidence": 0.9397689625620842,
+            "text": "60"
+        },
+        {
+            "cell": "H26",
+            "confidence": 0.9671503305435181,
+            "text": "62"
+        },
+        {
+            "cell": "H27",
+            "confidence": 0.9778892695903778,
+            "text": "64"
+        },
+        {
+            "cell": "H28",
+            "confidence": 0.8585792928934097,
+            "text": "92"
+        },
+        {
+            "cell": "H29",
+            "confidence": 0.9766127467155457,
+            "text": "65"
+        },
+        {
+            "cell": "H30",
+            "confidence": 0.9397899210453033,
+            "text": "66"
+        },
+        {
+            "cell": "H31",
+            "confidence": 0.9808380603790283,
+            "text": "64"
+        },
+        {
+            "cell": "H32",
+            "confidence": 0.9790222644805908,
+            "text": "71"
+        },
+        {
+            "cell": "H33",
+            "confidence": 0.9835993051528931,
+            "text": "72"
+        },
+        {
+            "cell": "H34",
+            "confidence": 0.9419334828853607,
+            "text": "89"
+        },
+        {
+            "cell": "H35",
+            "confidence": null,
+            "text": ""
+        },
+        {
+            "cell": "I3",
+            "confidence": 0.7605008482933044,
+            "text": ""
+        },
+        {
+            "cell": "I4",
+            "confidence": 0.9152672290802002,
+            "text": "1"
+        },
+        {
+            "cell": "I5",
+            "confidence": null,
+            "text": ""
+        },
+        {
+            "cell": "I6",
+            "confidence": 0.7633950114250183,
+            "text": ""
+        },
+        {
+            "cell": "I7",
+            "confidence": 0.50728440284729,
+            "text": "0"
+        },
+        {
+            "cell": "I8",
+            "confidence": null,
+            "text": ""
+        },
+        {
+            "cell": "I9",
+            "confidence": 0.39750462770462036,
+            "text": "0"
+        },
+        {
+            "cell": "I10",
+            "confidence": 0.6292921304702759,
+            "text": "0"
+        },
+        {
+            "cell": "I11",
+            "confidence": 0.748217761516571,
+            "text": "0"
+        },
+        {
+            "cell": "I12",
+            "confidence": 0.8864775896072388,
+            "text": "0"
+        },
+        {
+            "cell": "I13",
+            "confidence": null,
+            "text": ""
+        },
+        {
+            "cell": "I14",
+            "confidence": 0.663239061832428,
+            "text": "0"
+        },
+        {
+            "cell": "I15",
+            "confidence": 0.9184231162071228,
+            "text": "2"
+        },
+        {
+            "cell": "I16",
+            "confidence": null,
+            "text": ""
+        },
+        {
+            "cell": "I17",
+            "confidence": 0.5834792256355286,
+            "text": ""
+        },
+        {
+            "cell": "I18",
+            "confidence": 0.5635096430778503,
+            "text": "2"
+        },
+        {
+            "cell": "I19",
+            "confidence": 0.9479211568832397,
+            "text": "1"
+        },
+        {
+            "cell": "I20",
+            "confidence": 0.4671315848827362,
+            "text": "0"
+        },
+        {
+            "cell": "I21",
+            "confidence": 0.653867244720459,
+            "text": ""
+        },
+        {
+            "cell": "I22",
+            "confidence": 0.8945562839508057,
+            "text": "8"
+        },
+        {
+            "cell": "I23",
+            "confidence": null,
+            "text": ""
+        },
+        {
+            "cell": "I24",
+            "confidence": null,
+            "text": ""
+        },
+        {
+            "cell": "I25",
+            "confidence": null,
+            "text": ""
+        },
+        {
+            "cell": "I26",
+            "confidence": 0.6103362441062927,
+            "text": ""
+        },
+        {
+            "cell": "I27",
+            "confidence": 0.7982261776924133,
+            "text": ""
+        },
+        {
+            "cell": "I28",
+            "confidence": 0.9842886924743652,
+            "text": "7"
+        },
+        {
+            "cell": "I29",
+            "confidence": 0.4852290451526642,
+            "text": ""
+        },
+        {
+            "cell": "I30",
+            "confidence": 0.38860657811164856,
+            "text": "0"
+        },
+        {
+            "cell": "I31",
+            "confidence": null,
+            "text": ""
+        },
+        {
+            "cell": "I32",
+            "confidence": 0.4091743230819702,
+            "text": ""
+        },
+        {
+            "cell": "I33",
+            "confidence": 0.6164227724075317,
+            "text": "0"
+        },
+        {
+            "cell": "I34",
+            "confidence": 0.5873152017593384,
+            "text": "1"
+        },
+        {
+            "cell": "I35",
+            "confidence": null,
+            "text": ""
+        }
+    ]
+}
