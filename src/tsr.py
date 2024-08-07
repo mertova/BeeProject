@@ -30,25 +30,26 @@ def cells_form_vertices(p: [[Vertex]]):
     return cells
 
 
-def make_grid_lines(points1: list, points2: list, horizontal: bool, width: int, height: int) -> list[Line]:
+def make_grid_lines(points1: list, points2: list, vertical: bool, width: int, height: int) -> list[Line]:
+    """Makes a grid lines given two sets of numbers. Problem when those 2 sets are not equal in length.
+    """
     if points1 is None or points2 is None or len(points1) != len(points2):
         return []
-    if horizontal:
-        sorted_lines = create_lines_from_points(points1, points2, horizontal, width)
+    if vertical:
+        sorted_lines = create_lines_from_points(points1, points2, vertical, height)
     else:
-        sorted_lines = create_lines_from_points(points1, points2, horizontal, height)
+        sorted_lines = create_lines_from_points(points1, points2, vertical, width)
     return sorted_lines
 
 
 class GridExtraction:
-
     form_path: Path
     out_dir: Path
     eps_h: int
     eps_v: int
     form: Form
 
-    def __init__(self,form_path: Path, output_dir: Path, eps_h: int, eps_v: int):
+    def __init__(self, form_path: Path, output_dir: Path, eps_h: int, eps_v: int):
         self.out_dir = output_dir.absolute()
         self.eps_h = eps_h
         self.eps_v = eps_v
@@ -84,16 +85,36 @@ class GridExtraction:
         # line recognition with hough algorithm
         h_lines = self.form.line_scanner_hough()
 
+        if debug:
+            # todo
+            debug_dir = self.out_dir / "table_extraction"
+            debug_dir.mkdir(parents=True, exist_ok=True)
+
+            canvas = self.form.get_color().copy()
+            canvas = render_lines(canvas, h_lines, (0, 140, 255))
+            cv2.imwrite((debug_dir / "h_lines.png").as_posix(), canvas)
+
         # get ordered positions with all borderlines - clustered
         border_points = self._find_border_points(h_lines)
 
+        """
+        if debug:
+            canvas = self.form.get_color().copy()
+            for points in border_points:
+                canvas = self._debug_render_points(canvas, points)
+            cv2.imwrite("border_points.png", canvas)
+        """
         # find lines
-        grid_lines_vertical = make_grid_lines(border_points[0], border_points[1], False, self.form.width,
+        grid_lines_vertical = make_grid_lines(border_points[0], border_points[1], True, self.form.width,
                                               self.form.height)
-        grid_lines_horizontal = make_grid_lines(border_points[2], border_points[3], True,
+        grid_lines_horizontal = make_grid_lines(border_points[2], border_points[3], False,
                                                 self.form.width, self.form.height)
-        # todo
-        grid_lines_horizontal.pop(1)
+
+        if debug:
+            canvas = self.form.get_color().copy()
+            canvas = render_lines(canvas, grid_lines_horizontal, (0, 140, 255) )
+            canvas = render_lines(canvas, grid_lines_vertical, (0, 140, 255) )
+            cv2.imwrite((debug_dir / "grid_lines.png").as_posix(), canvas)
 
         # get dimensions
         shape = (len(grid_lines_vertical) - 1, len(grid_lines_horizontal) - 1)
@@ -107,17 +128,9 @@ class GridExtraction:
         table = Table(self.form_path.as_posix(), cells, shape)
 
         if debug:
-            # todo
-            debug_dir = self.out_dir / "table_extraction"
-            debug_dir.mkdir(parents=True, exist_ok=True)
-
             canvas = self.form.get_color().copy()
-            canvas = render_lines(canvas, h_lines, (0, 140, 255))
-            cv2.imwrite((debug_dir / "h_lines.png").as_posix(), canvas)
-
-            canvas = self.form.get_color().copy()
-            table.render(True, canvas)
-            cv2.imwrite((debug_dir / "grid.png").as_posix(), canvas)
+            canvas = table.render(canvas, False, True)
+            cv2.imwrite((debug_dir / "grid-text.png").as_posix(), canvas)
 
         return table
 
@@ -144,11 +157,16 @@ class GridExtraction:
 
     def _get_optimal_line_points(self, h_lines: list[Line], line: Line, size: int, vertical: bool) -> list[int]:
         border_points_simpl = line.line_set_intersections(h_lines, vertical)
-        optimal_points = cluster(border_points_simpl, self.eps_h)
+        if vertical:
+            optimal_points = cluster(border_points_simpl, self.eps_v)
+        else:
+            optimal_points = cluster(border_points_simpl, self.eps_h)
         optimal_points.append(size)
         optimal_points.append(0)
         return sorted(optimal_points)
 
-    def _debug(self, h_lines):
-        # todo
-        pass
+
+    def _debug_render_points(self, canvas, points):
+        for point in points:
+            canvas = cv2.circle(canvas, point.asTuple(), 2,  (0, 140, 255))
+        return canvas

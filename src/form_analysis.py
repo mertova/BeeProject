@@ -5,7 +5,6 @@ from pdf2image import convert_from_path
 from image_processing.reference import Reference
 
 
-
 # todo test on .pdf
 def load(path: Path = None):
     """
@@ -34,23 +33,25 @@ class FormAnalysis:
         self.reference = Reference(ref_img)
         self.out_dir = out_dir
 
-    def extract(self, data_sample_dir: Path, limit: int, debug: bool, transform: bool, averaging: bool):
+    def extract(self, data_sample_dir: Path | None, limit: int, debug: bool, transform: bool, averaging: bool):
         """
         identify the template from the sample data and reference image based on the comon and overlapping pixels
         :return: tuple: recognized template image, average overlapping pixels, and threshold image
         """
 
-        if data_sample_dir is None or not data_sample_dir.exists():
-            print("Path does not exist")
-            raise SystemExit(1)
-
         self.reference.pen_elimination()
         pen_eliminated = self.reference.get_color()
 
+        averaged = None
+
         if averaging:
+            if data_sample_dir is None or not data_sample_dir.exists():
+                print("Path does not exist")
+                raise SystemExit(1)
+
             self.averaging(data_sample_dir, limit, transform)
-        averaged = self.reference.get_grey()
-        self.reference.clean_averaged_form()
+            averaged = self.reference.get_grey()
+            self.reference.clean_averaged_form()
         if debug:
             self._dump_debug_images([averaged, pen_eliminated, self.reference.get_grey()])
         else:
@@ -65,7 +66,7 @@ class FormAnalysis:
             if x.is_file() and i < limit:
                 scan = cv2.imread(x.as_posix(), cv2.IMREAD_GRAYSCALE)
                 if transform:
-                    print("transformed image ", i, ": ", x.stem)
+                    print("transformed image ", i, ": ", x.name)
                     scan = self.reference.map_img_to_ref(scan)
                 self.reference.add_weighted(scan)
                 i += 1
@@ -76,7 +77,7 @@ class FormAnalysis:
         debug_dir.mkdir(parents=True, exist_ok=True)
         i = 0
         for img in images:
-            file_path = debug_dir / Path(str(i) + ".png")
             if img is not None:
+                file_path = debug_dir / Path(str(i) + ".png")
                 cv2.imwrite(file_path.as_posix(), img)
             i += 1

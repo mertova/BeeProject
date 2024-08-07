@@ -1,6 +1,8 @@
 import json
 import unittest
 from io import BytesIO
+
+import cv2
 from PIL import Image as Im
 
 from parameterized import parameterized
@@ -24,7 +26,7 @@ class MicrosoftTest(OcrTest):
     @classmethod
     def setUpClass(cls):
         # load credentials
-        credentials = "../data/credentials_microsoft.json"
+        credentials = "C:/Users/lmert/PhD/BeeProject/BeeProject/data/credentials_microsoft.json"
         try:
             with open(credentials) as credentials_file:
                 credentials = json.load(credentials_file)
@@ -34,12 +36,13 @@ class MicrosoftTest(OcrTest):
             print("Credentials file not found")
             exit(1)
 
-    @parameterized.expand([("test_form1", "./scans/Niedersach_examples_10/Sample_Niedersachsen-4-1.png", "2014-1"),
-                           ("test_form2", "./scans/Form2-examples-51-png/1977-7.png", "1997-7"),
-                           ("test_form1_no_template", "../test/scans/form1_removed_template/2014-1.png", "2014-1-1")])
+    @parameterized.expand([("test_form1", "C:/Users/lmert/PhD/BeeProject/BeeProject-dataset/SIFT_final_31_empty/2016/1.png", "2016-1")])
     def test_microsoft_azure(self, name, path, index):
         file_name = "microsoft_" + name + "_" + index + ".png"
-        self._test_and_render(self.service, path, file_name)
+        # given
+        img_mat = cv2.imread(path)
+        img_file = open(path, "rb")
+        self._test_and_render(self.service, img_file, img_mat, file_name)
 
 
 if __name__ == '__main__':

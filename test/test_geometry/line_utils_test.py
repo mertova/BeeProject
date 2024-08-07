@@ -8,7 +8,7 @@ from geometry.line import Line
 from geometry.vertex import Vertex
 
 
-class IdentificationTest(unittest.TestCase):
+class LineUtilsTest(unittest.TestCase):
 
     def test_create_lines_from_points(self):
         # given
@@ -16,7 +16,7 @@ class IdentificationTest(unittest.TestCase):
         pt_set2 = [12, 60, 80, 315]
 
         # when
-        lines = line_utils.create_lines_from_points(pt_set1, pt_set2, True, 500)
+        lines = line_utils.create_lines_from_points(pt_set1, pt_set2, False, 500)
 
         # test
         line1 = Line(Vertex(0, 10), Vertex(500, 12))
@@ -29,8 +29,8 @@ class IdentificationTest(unittest.TestCase):
         print(lines)
         canvas = np.zeros((500, 1000)) + 255
         cv2.imshow("clean canvas", canvas)
-        line_utils.render_lines(canvas, lines, (0, 30, 100))
-        cv2.imshow("horizontal lines", canvas)
+        line_canvas = line_utils.render_lines(canvas, lines, (0,0,0 ))
+        cv2.imshow("horizontal lines", line_canvas)
         cv2.waitKey(0)
 
 

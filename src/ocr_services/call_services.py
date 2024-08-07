@@ -31,8 +31,8 @@ def call_services(credentials, image: np.array) -> dict:
     google_vision = GoogleVision(credentials)
     result['google'] = google_vision.detect_document(image_data)
 
-    azure = MicrosoftAzure(credentials_json['microsoft_api_key'])
-    result['azure'] = azure.detect_document(image_data)
+    #azure = MicrosoftAzure(credentials_json['microsoft_api_key'])
+    #result['azure'] = azure.detect_document(image_data)
 
     # ToDO AMAZON AWS, Dtrocr ?
     return result

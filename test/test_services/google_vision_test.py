@@ -2,6 +2,7 @@ import unittest
 from io import BytesIO
 from pathlib import Path
 
+import cv2
 from PIL import Image
 
 from ocr_services.google_vision import GoogleVision
@@ -34,12 +35,12 @@ class GoogleTest(OcrTest):
             print("Credentials file not found")
             exit(1)
 
-    @parameterized.expand([("test_form1", "./scans/Niedersach_examples_10/Sample_Niedersachsen-4-1.png", "2014-1"),
-                           ("test_form2", "./scans/Form2-examples-51-png/1977-7.png", "1997-7"),
-                           ("test_form1_no_template", "../test/scans/form1_removed_template/2014-1.png", "2014-1-1")])
+    @parameterized.expand([("test_form1", "C:/Users/lmert/PhD/BeeProject/BeeProject-dataset/SIFT_final_31_empty/2016/1.png", "2016-1")])
     def test_ocr(self, name, path, index):
+        # image array to stream
+        image = cv2.imread(path)
         file_name = "google_" + name + "_" + index + ".png"
-        self._test_and_render(self.service, path, file_name)
+        self._test_and_render(self.service, get_stream_img(image), image, file_name)
 
 
 if __name__ == '__main__':

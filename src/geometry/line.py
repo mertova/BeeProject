@@ -93,7 +93,10 @@ class Line:
         return results
 
     def render(self, img, color):
-        return cv2.line(img, self.pt1.as_tuple(), self.pt2.as_tuple(), color, 4)
+        p1 = self.pt1.as_tuple()
+        p2 = self.pt2.as_tuple()
+        img = cv2.line(img, p1, p2, color, 2)
+        return img
 
     def __str__(self):
         return f'Line({self.pt1}, {self.pt2})'

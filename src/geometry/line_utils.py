@@ -17,16 +17,16 @@ def set_to_set_intersections(horizontal: list[Line], vertical: list[Line]) -> li
     return result_points
 
 
-def create_lines_from_points(position_set1: list[int], position_set2: list[int], horizontal: bool,
+def create_lines_from_points(position_set1: list[int], position_set2: list[int], vertical: bool,
                              max_val: int) -> list[Line]:
     if len(position_set1) != len(position_set2):
         raise ValueError('points are not matching')
     optimal_lines = []
     for i in range(len(position_set1)):
-        if horizontal:
-            optimal_lines.append(Line(Vertex(0, int(position_set1[i])), Vertex(max_val, int(position_set2[i]))))
-        else:
+        if vertical:
             optimal_lines.append(Line(Vertex(int(position_set1[i]), 0), Vertex(int(position_set2[i]), max_val)))
+        else:
+            optimal_lines.append(Line(Vertex(0, int(position_set1[i])), Vertex(max_val, int(position_set2[i]))))
     return optimal_lines
 
 
@@ -38,5 +38,5 @@ def render_lines(canvas, lines: list[Line], color):
     if lines is None:
         return result_img
     for line in lines:
-        line.render(result_img, color)
+        result_img = line.render(result_img, color)
     return result_img

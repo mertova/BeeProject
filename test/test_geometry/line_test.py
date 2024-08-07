@@ -4,8 +4,9 @@ from geometry.line import Line
 from geometry.vertex import Vertex
 
 
-class IdentificationTest(unittest.TestCase):
-    def assertTupleAlmostEqual(self, tuple1, tuple2, places=7, msg=None):
+class LineTest(unittest.TestCase):
+
+    def _assertTupleAlmostEqual(self, tuple1, tuple2, places=7, msg=None):
         self.assertEqual(len(tuple1), len(tuple2))
         for a, b in zip(tuple1, tuple2):
             self.assertAlmostEqual(a, b, places=places, msg=msg)
@@ -27,8 +28,8 @@ class IdentificationTest(unittest.TestCase):
         result = Vertex(3.33, 2.33)
         print(intersection)
         self.assertIsNotNone(intersection)
-        self.assertTupleAlmostEqual(intersection.as_tuple(), result.as_tuple(), 2,
-                                    "Intersection is not correct")
+        self._assertTupleAlmostEqual(intersection.as_tuple(), result.as_tuple(), 2,
+                                     "Intersection is not correct")
 
     def test_intersects_vertical(self):
         # given
@@ -48,8 +49,8 @@ class IdentificationTest(unittest.TestCase):
         result = Vertex(3.0, 2.33)
         print(intersection)
         self.assertIsNotNone(intersection)
-        self.assertTupleAlmostEqual(intersection.as_tuple(), result.as_tuple(), 2,
-                                    "Intersection is not correct")
+        self._assertTupleAlmostEqual(intersection.as_tuple(), result.as_tuple(), 2,
+                                     "Intersection is not correct")
 
     def test_intersects_vertical_vertical(self):
         # given
@@ -85,8 +86,8 @@ class IdentificationTest(unittest.TestCase):
         result = Vertex(1.5, 2.0)
         print(intersection)
         self.assertIsNotNone(intersection)
-        self.assertTupleAlmostEqual(intersection.as_tuple(), result.as_tuple(), 2,
-                                    "Intersection is not correct")
+        self._assertTupleAlmostEqual(intersection.as_tuple(), result.as_tuple(), 2,
+                                     "Intersection is not correct")
 
     def test_intersects_horizontal_vertical(self):
         # given
@@ -105,8 +106,8 @@ class IdentificationTest(unittest.TestCase):
         result = Vertex(-1.0, 2.0)
         print(intersection)
         self.assertIsNotNone(intersection)
-        self.assertTupleAlmostEqual(intersection.as_tuple(), result.as_tuple(), 2,
-                                    "Intersection is not correct")
+        self._assertTupleAlmostEqual(intersection.as_tuple(), result.as_tuple(), 2,
+                                     "Intersection is not correct")
 
     def test_intersects_extends_line(self):
         # given
@@ -125,8 +126,8 @@ class IdentificationTest(unittest.TestCase):
         result = Vertex(4.33, 4.33)
         print(intersection)
         self.assertIsNotNone(intersection)
-        self.assertTupleAlmostEqual(intersection.as_tuple(), result.as_tuple(), 2,
-                                    "Intersection is not correct")
+        self._assertTupleAlmostEqual(intersection.as_tuple(), result.as_tuple(), 2,
+                                     "Intersection is not correct")
 
     def test_intersects_outside(self):
         # given
@@ -178,7 +179,7 @@ class IdentificationTest(unittest.TestCase):
         results = (5.0, 3.0)
         print(intersections)
         self.assertIsNotNone(intersections)
-        self.assertTupleAlmostEqual(intersections, results, 2, "Intersections are not correct")
+        self._assertTupleAlmostEqual(intersections, results, 2, "Intersections are not correct")
 
 
 if __name__ == '__main__':
