@@ -1,4 +1,4 @@
-# Sensitive data ignore
+# Sensitive resources ignore
 
 # idea files
 .idea/*

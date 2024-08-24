@@ -1,9 +1,16 @@
 # BeeProject
-Our task is to convert PDF scans of handwritten documents to digital form.
 
-![The Workflow Scheme]()
+This work semi automate transcribing historical handwritten tables. Our presented method works on a mixture 
+of computer vision tools and optical character recognition (OCR) to detect the grid and content of the table. 
+The dataset we collected contains records from beekeepers, consisting of hive weight gain and loss 
+and meteorological conditions. The institute of bee protection from JKI  gathered this information from 
+the German beekeeper associations of Lower Saxony, Hesse, Mecklenburg-Vorpommern, Thuringia, and Brandenburg 
+in Germany within the collaborative research project MonViA. The sample of the dataset is avilable here. https://github.com/mertova/TheBeeProjectCollection.git
 
-## Quick start with tesseract
+
+![The Workflow Scheme](./resources/readmeImgs/workflow.png "Workflow Scheme")
+
+## Quick start
 
 Let's start a test run on the BeeProject dataset. 
 
@@ -82,48 +89,18 @@ Find your key and endpoint (Note: Check that your location is set correctly.)
 
 -----------------------------------
 ## The BeeProject Dataset
-Our dataset contains data from beekeepers. Documents are only in german language and are a mixture of machine-written and hand-written text. 
-
-Three types of documents:
-1. tables 
-2. question - answer 
-3. free text
+Our dataset contains data from beekeepers. Documents are only in german language and are a mixture of machine-written 
+and handwritten text.
 
 Source: 
 ```bash
 .
-├── data
-│   |   ├── scans      -- #examples of scaned documents in different formats
+├── resources
+│   |   ├── scans      -- #examples of scanned documents in different formats
 |   |   ├── pdf
 |   |   └── png
-│   ├── form1  -- #digitalized form1 (.xlsx - temporary)
+│   ├── form1  -- #digitalized form1 (.xlsx - temporary)
 |   └── ocr_results-form2    -- #outputs of different models applied on our scan examples
-|       ├── HTSNet
-|       └── Martine-DeepCurate
+|       ├── 
 ```
 
-### Related projects (models)
-Tobias Martine (DeepCurate) - https://github.com/TobiasMartine/DeepCurate
-
-EDD-architecture - https://github.com/ibm-aur-nlp/EDD
-
-HTSNet - https://github.com/jottue/HTSNet --> Does not work!!!
-
-### Available datasets
-IAM Handwriting Database - https://fki.tic.heia-fr.ch/databases/iam-handwriting-database
-
-PubTabNet - https://github.com/ibm-aur-nlp/PubTabNet
-
-https://www.primaresearch.org/datasets
-
-https://drive.google.com/file/d/1Q4kDiJts-yi9IhsYT6ku5Y4WNhwagnPJ/view
-
-https://www.primaresearch.org/datasets
-
-https://drive.google.com/file/d/1Q4kDiJts-yi9IhsYT6ku5Y4WNhwagnPJ/view
-
-
-### Resource Articles
-EDD - https://arxiv.org/pdf/1911.10683.pdf
-
-Handwritten Text Segmentation via End-to-End Learning of Convolutional Neural Networks - https://link.springer.com/article/10.1007/s11042-020-09624-9
