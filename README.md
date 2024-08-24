@@ -2,19 +2,49 @@
 
 This work semi automate transcribing historical handwritten tables. Our presented method works on a mixture 
 of computer vision tools and optical character recognition (OCR) to detect the grid and content of the table. 
-The dataset we collected contains records from beekeepers, consisting of hive weight gain and loss 
-and meteorological conditions. The institute of bee protection from JKI  gathered this information from 
-the German beekeeper associations of Lower Saxony, Hesse, Mecklenburg-Vorpommern, Thuringia, and Brandenburg 
-in Germany within the collaborative research project MonViA. The sample of the dataset is avilable here. https://github.com/mertova/TheBeeProjectCollection.git
 
-
-![The Workflow Scheme](./resources/readmeImgs/workflow.png "Workflow Scheme")
+![The Workflow Scheme]( ./resources/readmeImgs/workflow.png "Workflow Scheme")
 
 ## Quick start
 
 Let's start a test run on the BeeProject dataset. 
 
-todo 
+Clone repository and navigate to the project: 
+```shell
+git clone https://github.com/mertova/BeeProject.git
+cd BeeProject
+```
+
+```shell
+
+```
+
+-----------------------------------
+## The BeeProject Collection
+The dataset we collected contains records from beekeepers, consisting of hive weight gain and loss 
+and meteorological conditions. The institute of bee protection from JKI  gathered this information from 
+the German beekeeper associations of Lower Saxony, Hesse, Mecklenburg-Vorpommern, Thuringia, and Brandenburg 
+in Germany within the collaborative research project MonViA. The sample of the dataset is available [here][1].
+
+[1]: https://github.com/mertova/TheBeeProjectCollection.git        "The BeeProject Collection"
+
+
+```
+.
+├── resources
+│   ├── credentials   # place to store your credentials 
+│   ├── data          # place to store your data to be digitized
+│   └── play-data     # a sample from our BeeProject collection     
+├── src
+│   ├──
+│   ├──
+│   ├──
+│   └──
+├── test -- # test files
+├── execute_digitalization.py
+└── execute_extraction.py
+```
+
 
 --------------------------------------------
 ## Getting credentials from OCR Services
@@ -87,20 +117,5 @@ Find your key and endpoint (Note: Check that your location is set correctly.)
 }
 ```
 
------------------------------------
-## The BeeProject Dataset
-Our dataset contains data from beekeepers. Documents are only in german language and are a mixture of machine-written 
-and handwritten text.
-
-Source: 
-```bash
-.
-├── resources
-│   |   ├── scans      -- #examples of scanned documents in different formats
-|   |   ├── pdf
-|   |   └── png
-│   ├── form1  -- #digitalized form1 (.xlsx - temporary)
-|   └── ocr_results-form2    -- #outputs of different models applied on our scan examples
-|       ├── 
-```
+--------------------------------------------
 
