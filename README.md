@@ -21,31 +21,122 @@ cd BeeProject
 
 -----------------------------------
 ## The BeeProject Collection
+
+![The Workflow Scheme]( ./resources/readmeImgs/dataset.png "Dataset")
+
 The dataset we collected contains records from beekeepers, consisting of hive weight gain and loss 
 and meteorological conditions. The institute of bee protection from JKI  gathered this information from 
 the German beekeeper associations of Lower Saxony, Hesse, Mecklenburg-Vorpommern, Thuringia, and Brandenburg 
-in Germany within the collaborative research project MonViA. The sample of the dataset is available [here][1].
+in Germany within the collaborative research project MonViA. The sample of the dataset is available [here][1] and full 
+dataset can be accessed via [this link][2]. Please cite our dataset wit this citation: [[1]](#1).
 
-[1]: https://github.com/mertova/TheBeeProjectCollection.git        "The BeeProject Collection"
+[1]: https://github.com/mertova/TheBeeProjectCollection.git        "GitHub: The BeeProject Collection - sample"
+[2]: https://fairdomhub.org/data_files/7415?version=1              "Fairdomhub: The BeeProject Collection - full"
 
+-----------------------------------
+## Digitize your data
+Supported formats. 
 
+Our source code is organized as follows: 
 ```
 .
 ├── resources
-│   ├── credentials   # place to store your credentials 
-│   ├── data          # place to store your data to be digitized
-│   └── play-data     # a sample from our BeeProject collection     
+│   ├── credentials                 # place to store your credentials 
+│   ├── data                        # place to store your data to be digitized
+│   └── play-data                   # a sample from our BeeProject collection     
 ├── src
+│   ├── 
 │   ├──
 │   ├──
-│   ├──
-│   └──
-├── test -- # test files
-├── execute_digitalization.py
-└── execute_extraction.py
+│   └── 
+├── test                            # test files
+├── execute_digitalization.py       # 
+└── execute_extraction.py           #
+```
+1. place your data in 
+
+As shown in the picture above, the digitisation process consists of 2 steps: 
+### 1. Table extraction
+```shell
+python execute_extraction.py 
+  - dataset
+  - output
+  - reference image
+  - 
 ```
 
 
+| Flag | Full name   | Type | Default                      | Description                                                          |
+|------|-------------|------|------------------------------|----------------------------------------------------------------------|
+| -d   | --dataset   | str  | -                            | Path to the dataset                                                  |
+| -r   | --reference | str  | -                            | Path to the representative image                                     |
+| -ev  | --epsilon_v | int  | 10                           | Epsilon - deviation for a vertical grid lines                        |
+| -eh  | --epsilon_h | int  | 15                           | Epsilon - deviation for a horizontal grid lines                      |
+| -l   | --limit     | int  | 15                           | Limit the sample files for table extraction                          |
+| -t   | --transform | bool | True                         | Transformation (alignment) of sample resources to the reference file |
+| -o   | --output    | str  | ./resources/data/extraction/ | Path to the output folder                                            |
+
+
+ #### Output 
+1. Form image: 
+
+2. Json output example: 
+```json
+{
+  "cells": [{
+      "id": "A0",
+      "id_col": "0",
+      "id_row": "0",
+      "pt1": [0, 0],
+      "pt2": [71, 287]},
+    { "id": "B0",
+      "id_col": "1",
+      "id_row": "0",
+      "pt1": [71, 0],
+      "pt2": [211, 287]}, 
+    ...]
+}
+```
+### 2. Digitization
+```shell
+python execute_extraction.py 
+  - dataset
+  - output
+  - reference image
+  - 
+```
+
+
+| Flag | Full name | Type | Default | Description                                 |
+|------|-----------|------|---------|---------------------------------------------|
+| -d   | dataset   | str  | -       | path to the dataset                         |
+| -o   | output    | str  | -       | path to the out folder                      |
+| -ref | reference | str  | -       | path to the representative image            |
+| -ev  | epsilon_v | int  | 10      | Raster for vertical lines                   |
+| -eh  | epsilon_h | int  | 15      | Raster for horizontal lines                 |
+| -l   | limit     | int  | 15      | limit the sample files for grid extraction  |
+| -t   | transform | bool | True    | Transformation (alignment) of sample images |
+
+#### Output
+1. Form image: 
+
+2. Json output example: 
+```json
+{
+  "cells": [{
+      "id": "A0",
+      "id_col": "0",
+      "id_row": "0",
+      "pt1": [0, 0],
+      "pt2": [71, 287]},
+    { "id": "B0",
+      "id_col": "1",
+      "id_row": "0",
+      "pt1": [71, 0],
+      "pt2": [211, 287]}, 
+    ...]
+}
+```
 --------------------------------------------
 ## Getting credentials from OCR Services
 
@@ -118,4 +209,10 @@ Find your key and endpoint (Note: Check that your location is set correctly.)
 ```
 
 --------------------------------------------
+
+### References
+<a id="1">[1]</a> 
+Mertová, L., Lewkowski, O., Polreich, S., & Müller, W. (2024). 
+BeeProject-collection [Data set].
+FAIRDOMHub. https://doi.org/10.15490/FAIRDOMHUB.1.DATAFILE.7415.1
 

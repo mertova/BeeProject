@@ -2,6 +2,8 @@ import cv2
 import numpy
 import numpy as np
 
+from vertex import Vertex
+
 
 class Image:
 
@@ -11,16 +13,21 @@ class Image:
 
     def __init__(self, image):
         if image is None or type(image) is not numpy.ndarray:
-            raise ValueError("Image in none or wrong type.")
+            raise ValueError("Image is None or wrong type.")
         self.__set_image(image)
 
     def __set_image(self, image):
+        """
+        Evaluates channels (shape) of numpy array and sets color, grey and inverse images.
+        :param image: input numpy array
+        :raise ValueError when image is wrong shape.
+        """
         if len(image.shape) == 3:
             self._set_color(image)
         elif len(image.shape) == 2:
             self._set_grey(image)
         else:
-            raise FileNotFoundError("Unsupported file type - image has wrong number of channels")
+            raise ValueError("Unsupported file type - image has wrong number of channels")
 
     def _set_color(self, img):
         self._color = img
@@ -47,9 +54,6 @@ class Image:
         self._set_grey(text_scan)
         self.sharpening()
 
-    def crop_image(self, pt1, pt2, eps: int):
-        return self._color[pt1.x - eps:pt1.y - eps, pt2.x + eps:pt2.y + eps]
-
     def threshold(self):
         ret, thresh = cv2.threshold(self._inverse, 100, 255, cv2.THRESH_TOZERO)
         thresh_inverse = cv2.bitwise_not(thresh)
@@ -63,9 +67,9 @@ class Image:
         clean = cv2.filterSpeckles(self._grey, 255, 10, 2000)
         self._set_grey(clean[0])
 
-    def erode(self):
+    def erode(self, n):
         # Creating kernel
-        kernel = np.ones((2, 2), np.uint8)
+        kernel = np.ones((n, n), np.uint8)
 
         # Using cv2.erode() method
         erode = cv2.erode(self._color, kernel, cv2.BORDER_REFLECT)
@@ -106,8 +110,3 @@ class Image:
         opening = cv2.morphologyEx(self._grey, cv2.MORPH_OPEN, kernel)
         self._set_grey(opening)
 
-    def render(self, directory: str, grey: bool):
-        if grey:
-            cv2.imwrite(directory, self._grey)
-        else:
-            cv2.imwrite(directory, self._color)
