@@ -7,24 +7,24 @@ from image_processing.image import Image
 
 
 class Form(Image):
-    _height: int
-    _width: int
+    __height: int
+    __width: int
 
-    _up_left: Vertex
-    _up_right: Vertex
-    _down_left: Vertex
-    _down_right: Vertex
+    __up_left: Vertex
+    __up_right: Vertex
+    __down_left: Vertex
+    __down_right: Vertex
 
-    _border_up: Line
-    _border_down: Line
-    _border_left: Line
-    _border_right: Line
+    __border_up: Line
+    __border_down: Line
+    __border_left: Line
+    __border_right: Line
 
     def __init__(self, image: str):
         super().__init__(image)
-        self._set_dimensions()
+        self.__set_dimensions()
 
-    def _set_dimensions(self):
+    def __set_dimensions(self):
         """
         set dimensions of the form image: width, height, 4 corner points and 4 borderlines from the sape of the image
         """
@@ -76,5 +76,3 @@ class Form(Image):
             lines_list.append(Line(v1, v2))
         return lines_list
 
-    def render_form(self, path: str):
-        self.render(path, False)

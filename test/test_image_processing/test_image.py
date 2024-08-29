@@ -8,18 +8,29 @@ import numpy as np
 from image_processing.image import Image
 
 
-class MyTestCase(unittest.TestCase):
-    def setUp(self):
-        current = os.getcwd()
-        root_path = Path(current).parents[1]
-        self.sample_path = (root_path /
-                            "resources/play-data/test_data_2014/17_LHI_observation_reports_2014-1.png")
-        if not self.sample_path.exists() or not self.sample_path.is_file():
-            raise FileNotFoundError("No image, path " + self.sample_path.absolute().as_posix() + " is incorrect")
+class TestImage(unittest.TestCase):
+    """
+    Tests Image class
+    """
 
-        self.nparray_color = cv2.imread(self.sample_path.as_posix())
-        self.nparray_grey = cv2.cvtColor(self.nparray_color, cv2.COLOR_BGR2GRAY)
-        self.out_path = root_path / "test/resources/results/test_image"
+    nparray_color = None
+    out_path = None
+    sample_img_path = None
+    test_root_path = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.test_root_path = Path(os.getcwd()).parents[0]
+        cls.sample_img_path = cls.test_root_path / "resources/scans/1.png"
+
+        if not cls.sample_img_path.is_file():
+            raise FileNotFoundError("No image, path " + cls.sample_img_path.absolute().as_posix() + " is incorrect")
+
+        cls.nparray_color = cv2.imread(cls.sample_img_path.as_posix())
+        cls.nparray_grey = cv2.cvtColor(cls.nparray_color, cv2.COLOR_BGR2GRAY)
+
+        cls.out_path = cls.test_root_path / "resources/results/test_image/"
+        cls.out_path.mkdir(parents=True, exist_ok=True)
 
     def test_init_color(self):
         image = Image(self.nparray_color)

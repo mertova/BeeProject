@@ -1,4 +1,3 @@
-
 import cv2
 import numpy as np
 
@@ -10,13 +9,15 @@ def good_matches(matches):
     """
     # Find good matches using Lowe's ratio test
     good = []
-    for m, n in matches:
-        if m.distance < 0.75 * n.distance:
-            good.append(m)
+    for match in matches:
+        if match is None or len(match) != 2:
+            continue
+        if match[0].distance < 0.75 * match[1].distance:
+            good.append(match[0])
     return good
 
 
-def flann_matches(descr_img, descr_ref):
+def flann_matches_sift(descr_img, descr_ref):
     """ Matches the key points of SIFT-features based on the given descriptors
     using a FLANN-based matcher, and returns the matches.
 
@@ -28,14 +29,40 @@ def flann_matches(descr_img, descr_ref):
     return flann.knnMatch(descr_img, descr_ref, k=2)
 
 
+def flann_matches_orb(descr_img, descr_ref):
+    """ Matches the key points of SIFT-features based on the given descriptors
+    using a FLANN-based matcher, and returns the matches.
+
+    """
+    index_params = dict(algorithm=6,
+                        table_number=6,  # 12
+                        key_size=12,  # 20
+                        multi_probe_level=1)  # 2
+
+    search_params = dict(checks=50)
+    flann = cv2.FlannBasedMatcher(index_params, search_params)
+    # Finding all matching key points
+    return flann.knnMatch(descr_img, descr_ref, k=2)
+
+
 class Reference(Image):
+    """
+    Class to represent the reference image. Inherits from Image class. Attribute image in the constructor has to be
+    numpy array type image.
+    """
 
-    # Initialising a SIFT-detector
-    __detector = cv2.SIFT.create()
-
-    def __init__(self, image: np.array):
+    def __init__(self, image: np.array, algo: str):
         super().__init__(image)
-        self.kpts_ref, self.descr_ref = self.__detector.detectAndCompute(self._color, None)
+        self.algo = algo
+        if algo == "orb":
+            # Initialising an ORB-detector
+            self.__detector = cv2.ORB.create()
+        elif algo == "sift":
+            # Initialising a SIFT-detector
+            self.__detector = cv2.SIFT.create()
+        else:
+            raise ValueError("supported algorithm values are either 'orb' or 'sift'")
+        self.__kpts_ref, self.__descr_ref = self.__detector.detectAndCompute(self._color, None)
 
     def pen_elimination(self):
         """
@@ -55,28 +82,7 @@ class Reference(Image):
         mask_inverse = cv2.bitwise_not(mask)
         mask_inverse = cv2.filterSpeckles(mask_inverse, 255, 20, 200)
         res = cv2.bitwise_and(self._color, self._color, mask=mask_inverse[0])
-        self._set_color(res + 255)
-
-    def clean_averaged_form(self):
-        cv2.imshow('orig', self._color)
-
-        self.sharpening()
-        self.erode()
-        self.add_contrast()
-        self.threshold2()
-        self.sharpening()
-        self.filter_speckles()
-        cv2.imshow('image', self._color)
-        cv2.waitKey(0)
-        """
-        self.add_contrast()
-        self.sharpening()
-        self.erode()
-
-        self.threshold()
-        self.filter_speckles()
-        self.sharpening()
-        """
+        self.__set_color(res + 255)
 
     def map_img_to_ref(self, image, method=cv2.RANSAC, ransac_thresh=5.0, min_match_count=100):
         """ Calculates features of the given image and reference image, matches
@@ -88,8 +94,13 @@ class Reference(Image):
         kpts_img, descr_img = self.__detector.detectAndCompute(image, None)
 
         # Matching of both images
-        matches = flann_matches(descr_img, self.descr_ref)
+        if self.algo == "orb":
+            # Matching of both images
+            matches = flann_matches_orb(descr_img, self.__descr_ref)
+        else:
+            matches = flann_matches_sift(descr_img, self.__descr_ref)
         good = good_matches(matches)
+
         if not len(good) > min_match_count:
             print(f'Could not find enough good matches to match the images!')
             exit(-1)
@@ -97,7 +108,7 @@ class Reference(Image):
         # Creating a numpy array from the key points which are good matches for
         # the image and the reference image, respectively
         img_pts = np.float32([kpts_img[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
-        ref_pts = np.float32([self.kpts_ref[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
+        ref_pts = np.float32([self.__kpts_ref[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
 
         # Computing the transformation from the reference image to the image
         transform_mat = cv2.findHomography(img_pts, ref_pts, method, ransac_thresh)[0]
