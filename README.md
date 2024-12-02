@@ -212,7 +212,16 @@ Find your key and endpoint (Note: Check that your location is set correctly.)
 
 ### References
 <a id="1">[1]</a> 
+Lukrécia Mertová, Severin Polreich, Oleg Lewkowski, and Wolfgang Müller.
+2024. The BeeProject: Advanced Digitisation and Creation of a Dataset
+for the Monitoring of Beehives. In The 2024 ACM/IEEE Joint Conference on
+Digital Libraries (JCDL ’24), December 16–20, 2024, Hong Kong, China. ACM,
+New York, NY, USA, 11 pages. https://doi.org/10.1145/3677389.3702599
+
+<a id="2">[2]</a> 
 Mertová, L., Lewkowski, O., Polreich, S., & Müller, W. (2024). 
 BeeProject-collection [Data set].
 FAIRDOMHub. https://doi.org/10.15490/FAIRDOMHUB.1.DATAFILE.7415.1
+
+
 
