@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 from geometry.vertex import Vertex
 
@@ -80,7 +81,7 @@ class Line:
         :param vertical: true if line is vertical, else horizontal
         :return: false if no intersection (determinant == 0)
         """
-        if self is None or l_set is None:
+        if l_set is None:
             return []
         results = []
         for line in l_set:
@@ -92,7 +93,7 @@ class Line:
                     results.append(int_pt.x)
         return results
 
-    def render(self, img, color):
+    def render(self, img: np.array, color: (int, int, int)):
         p1 = self.pt1.as_tuple()
         p2 = self.pt2.as_tuple()
         img = cv2.line(img, p1, p2, color, 2)

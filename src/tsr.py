@@ -12,7 +12,7 @@ from geometry import line_utils
 from table.cell import Cell
 
 
-def cells_form_vertices(p: [[Vertex]]):
+def cells_from_vertices(p: [[Vertex]]):
     if p is None or len(p) == 0:
         return None
 
@@ -42,20 +42,20 @@ def make_grid_lines(points1: list, points2: list, vertical: bool, width: int, he
     return sorted_lines
 
 
-class GridExtraction:
+class Tsr:
     form_path: Path
     out_dir: Path
     eps_h: int
     eps_v: int
     form: Form
 
-    def __init__(self, form_path: Path, output_dir: Path, eps_h: int, eps_v: int):
-        self.out_dir = output_dir.absolute()
+    def __init__(self, form: Path, eps_h: int, eps_v: int, out_dir: Path = None):
         self.eps_h = eps_h
         self.eps_v = eps_v
-        self.form_path = form_path
+        self.form_path = form
+        self.out_dir = out_dir
 
-    def extract(self, debug):
+    def extract(self):
         if self.eps_h is None or self.eps_v is None or self.form_path is None or self.out_dir is None:
             print("Some of the attributes is None")
             exit(1)
@@ -71,50 +71,25 @@ class GridExtraction:
             exit(1)
 
         print("Extracting grid ...")
-        grid = self._process_pipeline(debug)
+        grid = self._process_pipeline()
         grid.export_json(self.out_dir)
         return grid
 
-    def _process_pipeline(self, debug) -> Table:
+    def _process_pipeline(self) -> Table:
         """
         Extract Table from the Form.
-        :param debug: in case we want to render some steps of the process
         :return:
         """
-
         # line recognition with hough algorithm
         h_lines = self.form.line_scanner_hough()
-
-        if debug:
-            # todo
-            debug_dir = self.out_dir / "table_extraction"
-            debug_dir.mkdir(parents=True, exist_ok=True)
-
-            canvas = self.form.get_color().copy()
-            canvas = render_lines(canvas, h_lines, (0, 140, 255))
-            cv2.imwrite((debug_dir / "h_lines.png").as_posix(), canvas)
-
         # get ordered positions with all borderlines - clustered
         border_points = self._find_border_points(h_lines)
 
-        """
-        if debug:
-            canvas = self.form.get_color().copy()
-            for points in border_points:
-                canvas = self._debug_render_points(canvas, points)
-            cv2.imwrite("border_points.png", canvas)
-        """
         # find lines
         grid_lines_vertical = make_grid_lines(border_points[0], border_points[1], True, self.form.width,
                                               self.form.height)
         grid_lines_horizontal = make_grid_lines(border_points[2], border_points[3], False,
                                                 self.form.width, self.form.height)
-
-        if debug:
-            canvas = self.form.get_color().copy()
-            canvas = render_lines(canvas, grid_lines_horizontal, (0, 140, 255) )
-            canvas = render_lines(canvas, grid_lines_vertical, (0, 140, 255) )
-            cv2.imwrite((debug_dir / "grid_lines.png").as_posix(), canvas)
 
         # get dimensions
         shape = (len(grid_lines_vertical) - 1, len(grid_lines_horizontal) - 1)
@@ -123,15 +98,8 @@ class GridExtraction:
         intersections = line_utils.set_to_set_intersections(grid_lines_horizontal, grid_lines_vertical)
 
         # create bounding boxes of all cells
-        cells = cells_form_vertices(intersections)
-
+        cells = cells_from_vertices(intersections)
         table = Table(self.form_path.as_posix(), cells, shape)
-
-        if debug:
-            canvas = self.form.get_color().copy()
-            canvas = table.render(canvas, False, True)
-            cv2.imwrite((debug_dir / "grid-text.png").as_posix(), canvas)
-
         return table
 
     def _find_border_points(self, h_lines: list[Line]) -> list[list[int]] | None:
@@ -164,7 +132,6 @@ class GridExtraction:
         optimal_points.append(size)
         optimal_points.append(0)
         return sorted(optimal_points)
-
 
     def _debug_render_points(self, canvas, points):
         for point in points:

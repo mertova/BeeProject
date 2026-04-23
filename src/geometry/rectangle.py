@@ -37,7 +37,7 @@ class Rectangle:
         rec_color = (0, 140, 255)
         text_color = (0, 0, 0)
         cv2.rectangle(canvas, self.pt1.as_tuple(), self.pt2.as_tuple(), rec_color, 3)
-        left_bottom = (int(self.pt1.x) +30, int(self.pt2.y) - 10 )
+        left_bottom = (int(self.pt1.x) + 30, int(self.pt2.y) - 10)
         if with_text:
             text = self.text
             canvas = cv2.putText(canvas, text, left_bottom,

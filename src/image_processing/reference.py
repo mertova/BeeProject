@@ -82,7 +82,7 @@ class Reference(Image):
         mask_inverse = cv2.bitwise_not(mask)
         mask_inverse = cv2.filterSpeckles(mask_inverse, 255, 20, 200)
         res = cv2.bitwise_and(self._color, self._color, mask=mask_inverse[0])
-        self.__set_color(res + 255)
+        self._set_color(res + 255)
 
     def map_img_to_ref(self, image, method=cv2.RANSAC, ransac_thresh=5.0, min_match_count=100):
         """ Calculates features of the given image and reference image, matches
@@ -120,3 +120,9 @@ class Reference(Image):
         # Using the inverse transformation (image -> reference image)
         transformed = cv2.warpPerspective(image, transform_mat, dsize)
         return transformed
+
+    def add_weighted(self, img):
+        # add greyscale img to reference
+        added = cv2.addWeighted(self.get_grey(), 0.8, img, 0.2, 0)
+        # set reference image - color and inverse will be automatically calculated
+        self._set_grey(added)

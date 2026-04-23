@@ -32,17 +32,17 @@ class Cell(Rectangle):
         self.is_active = False
         super().__init__(pt1, pt2, encode_index(self.col_id, self.row_id))
 
-    def __dict__(self):
+    def to_dict(self):
         """
         dictionary representation of the cell
         :return Returns a string representation (-json) of the coords and identifier
         """
-        return {'text': self.text, 'pt1': self.pt1.__dict__(), 'pt2': self.pt2.__dict__()}
+        return {'text': self.text, 'pt1': self.pt1.to_dict(), 'pt2': self.pt2.to_dict()}
 
     def import_json(self, json_dict):
         self.text = json_dict['text']
         self.pt1 = Vertex(json_dict['pt1']['x'], json_dict['pt1']['y'])
-        self.pt2 = Vertex(json_dict['pt2']['y'], json_dict['pt2']['y'])
+        self.pt2 = Vertex(json_dict['pt2']['x'], json_dict['pt2']['y'])
         self.col_id, self.row_id = decode_index(self.text)
 
     def activate_cell(self):

@@ -1,75 +1,73 @@
 import argparse
 from pathlib import Path
 
+import cv2
+
 from table.table import Table
-from table_extraction import GridExtraction
+from tsr import Tsr
 from image_processing.reference import Reference
 from form_analysis import FormAnalysis
 
 
-def main(path_t_output: str, path_reference: str, eps_h: int, eps_v: int, template_extraction: bool = False,
-         path_data_sample: str = None, data_limit: int = None,
-         transform: bool = False, debug: bool = False) -> tuple[Reference, Table]:
-    out_dir = Path(path_t_output)
-    if not out_dir.exists():
-        print("The output directory doesn't exist.\n")
-        raise exit(1)
+def main(data_dir: str, ref_dir: str, eps_v: int = 15, eps_h: int = 20, data_limit: int = 15, transform: bool = True,
+         out_dir: str = "./resources/data/extraction", averaging: bool = True) -> tuple[Reference, Table]:
+    if type(eps_v) is not int or type(eps_h) is not int:
+        raise TypeError('eps_v and eps_h must be integers')
 
-    reference_dir = Path(path_reference)
-    if not reference_dir.is_file():
-        print("The path to the reference file is not valid or doesn't exist.\n")
-        raise exit(1)
+    data_path = Path(data_dir)
+    if not data_path.exists() or not data_path.is_dir():
+        raise NotADirectoryError(data_path)
 
-    t_extr = FormAnalysis(out_dir, reference_dir)
-    if template_extraction:
-        print("Processing with template extraction ... ")
-        data_sample_dir = Path(path_data_sample)
-        if not data_sample_dir.exists():
-            print("The data_sample directory doesn't exist.")
-            raise exit(1)
+    ref_path = Path(ref_dir)
+    if not ref_path.is_file():
+        raise FileNotFoundError("The path to the reference file is not valid or doesn't exist.\n")
+    ref_image = cv2.imread(ref_path.as_posix())
 
-        # extract template
-        template = t_extr.extract(data_sample_dir, data_limit, transform=transform, debug=debug)
-        template.render()
-    else:
-        template = t_extr.get_reference()
+    out_path = Path(out_dir)
+    out_path.mkdir(parents=True, exist_ok=True)
+
+    t_extr = FormAnalysis(ref_image)
+
+    print("Processing with template extraction ... ")
+    template = t_extr.extract(data_path, data_limit, transform=transform, pen_elimination=averaging)
 
     if template is None:
         print("Template not found")
         exit(1)
+    else:
+        template_path = (out_path / 'template.png').as_posix()
+        print("Successfully extracted template, printing to " + template_path)
+        cv2.imwrite(template_path, template.get_color())
 
     # todo type check of eps
-    g_extr = GridExtraction(out_dir, eps_h, eps_v, template=template)
-    grid = g_extr.extract(debug)
-    grid.export_dict(out_dir)
+    print("Processing with table extraction ... ")
+    g_extr = Tsr(out_path, eps_h, eps_v, template=template)
+    grid = g_extr.extract()
+    grid.export_dict(out_path)
     return grid
 
 
 if __name__ == '__main__':
+    """
+    This is the entry point of the table extraction."""
+    # todo change ev and eh
     parser = argparse.ArgumentParser(prog='The BeeProject - Extract Templates',
                                      description='Digitization of the tabular forms from the image. Extracting empty '
                                                  'clean template file from the batch of handwritten filled images.')
-
-    parser.add_argument("-out", "--path_t_output", type=str, required=True,
-                        help="Path to the output file for storing template")
-
-    parser.add_argument("-ref", "--path_reference", type=str, required=True,
-                        help="Path to the template or reference file if we process template extraction")
-    parser.add_argument("-data", "--path_data_sample", type=str, required=False,
-                        help="Path to the data sample file")
-    parser.add_argument("-template", "--template_extraction", action=argparse.BooleanOptionalAction,
-                        default=False, help="Proceed with the template extraction")
-
-    parser.add_argument("-ev", "--epsilon_vertical", type=int, required=True,
+    parser.add_argument("-d", "--dataset", type=str, required=True,
+                        help="Path to the dataset")
+    parser.add_argument("-r", "--reference", type=str, required=True,
+                        help="Path to the representative image")
+    parser.add_argument("-ev", "--eps_v", type=int, default=15,
                         help="Epsilon - deviation for a vertical grid lines")
-    parser.add_argument("-eh", "--epsilon_horizontal", type=int, required=True,
+    parser.add_argument("-eh", "--eps_h", type=int, default=15,
                         help="Epsilon - deviation for a horizontal grid lines")
-
-    parser.add_argument("-t", "--transform", action=argparse.BooleanOptionalAction, default=False,
-                        help="if true - proceed with alignment of sample data to the reference file")
-    parser.add_argument("-d", "--debug", action=argparse.BooleanOptionalAction, default=False,
-                        help="debug mode activated")
+    parser.add_argument("-l", "--limit", type=int, default=15,
+                        help="Limit the sample files for table extraction")
+    parser.add_argument("-t", "--transform", action=argparse.BooleanOptionalAction, default=True,
+                        help="Transformation (alignment) of sample resources to the reference file")
+    parser.add_argument("-o", "--output", type=str, default="./resources/data/extraction/",
+                        help="Path to the output folder")
     args = parser.parse_args()
 
-    main(args.path_t_output, args.eh, args.ev, args.path_reference, args.path_data_sample, args.template_extraction,
-         args.transform, args.debug)
+    main(args.dataset, args.reference, args.eps_v, args.eps_h, args.limit, args.transform, args.output)

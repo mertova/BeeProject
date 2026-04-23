@@ -29,7 +29,7 @@ class MicrosoftAzure:
         self.client = ComputerVisionClient(endpoint=endpoint, credentials=credentials)
 
     def detect_document(self, image_stream):
-        # image_stream.seek(0)  # Rewind the stream to the beginning
+        image_stream.seek(0)  # Rewind the stream to the beginning
         try:
             http_response = self.client.read_in_stream(image_stream, language='en', raw=True)
         except ComputerVisionOcrErrorException as e:

@@ -1,3 +1,4 @@
+import io
 import json
 from io import BytesIO
 
@@ -16,11 +17,6 @@ def call_services(credentials, image: np.array) -> dict:
     :param image: document to be processed.
     :return: dictionaries containing Google Vision and Microsoft Azure OcrAnnotations.
     """
-    # image array to stream
-    image = Im.fromarray(image)
-    with BytesIO() as temp_buffer:
-        image.save(temp_buffer, format='png')
-        image_data = temp_buffer.getvalue()
 
     # load credentials
     with open(credentials, 'r') as f:
@@ -29,13 +25,27 @@ def call_services(credentials, image: np.array) -> dict:
     result = {}
 
     google_vision = GoogleVision(credentials)
-    result['google'] = google_vision.detect_document(image_data)
+    result['google'] = google_vision.detect_document(get_stream_img(image))
 
-    #azure = MicrosoftAzure(credentials_json['microsoft_api_key'])
-    #result['azure'] = azure.detect_document(image_data)
+    """
+    image_pil = Im.fromarray(image)
+    image_stream = io.BytesIO()
+    image_pil.save(image_stream, format='JPEG')
 
+    azure = MicrosoftAzure(credentials_json['microsoft_api_key'])
+    result['azure'] = azure.detect_document(image_stream)
+    """
     # ToDO AMAZON AWS, Dtrocr ?
     return result
+
+
+def get_stream_img(img):
+    # image array to stream
+    image = Im.fromarray(img)
+    with BytesIO() as temp_buffer:
+        image.save(temp_buffer, format='png')
+        image_data = temp_buffer.getvalue()
+    return image_data
 
 
 def render_annotations(image_path: str, ocr_annotations, canvas, with_text=False):

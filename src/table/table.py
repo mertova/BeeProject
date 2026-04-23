@@ -9,6 +9,8 @@ from src.table.cell import Cell
 class Table:
     """
     A class to represent a table in the given form.
+
+    todo template path to template class? - rename too
     """
 
     template_path: str
@@ -43,7 +45,7 @@ class Table:
         output_file = output_dir / "table.json"
         output = {'template': self.template_path, 'shape': self.shape, 'cells': []}
         for cell in self._cells:
-            output['cells'].append(cell.__dict__())
+            output['cells'].append(cell.to_dict())
         with open(output_file, 'w') as f:
             json.dump(output, f, sort_keys=True, indent=4)
 
@@ -77,10 +79,10 @@ class Table:
         return canvas
 
     def __str__(self):
-        self._cells.sort()
+        sorted_cells = sorted(self._cells)
         result = f"Table( \n"
         col = 0
-        for cell in self._cells:
+        for cell in sorted_cells:
             if col != cell.col_id:
                 result += "\n"
                 col = cell.col_id

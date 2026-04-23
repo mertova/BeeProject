@@ -41,7 +41,7 @@ class Vertex:
     def render(self, img, color, radius=5):
         return cv2.circle(img, self.as_tuple(), radius, color=color, thickness=-1)
 
-    def __dict__(self):
+    def to_dict(self):
         return {'x': self.x, 'y': self.y}
 
     def __str__(self):
