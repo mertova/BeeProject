@@ -1,190 +1,197 @@
 # BeeProject
 
-This work semi automate transcribing historical handwritten tables. Our presented method works on a mixture 
-of computer vision tools and optical character recognition (OCR) to detect the grid and content of the table. 
+**Semi-automated digitization of historical handwritten tabular records.**
 
-![The Workflow Scheme]( ./resources/readmeImgs/workflow.png "Workflow Scheme")
+BeeProject combines computer vision and optical character recognition (OCR) to detect the grid structure of scanned paper forms and extract their handwritten content into structured JSON. It was developed to digitize beekeeping observation records collected across Germany as part of the MonViA research project.
+
+![Workflow]( ./resources/readmeImgs/workflow.png "Two-step digitization workflow")
+
+---
+
+## Contents
+
+- [How it works](#how-it-works)
+- [Quick start](#quick-start)
+- [Installation](#installation)
+- [CLI reference](#cli-reference)
+  - [bee extract](#bee-extract)
+  - [bee digitize](#bee-digitize)
+- [Output format](#output-format)
+- [OCR credentials](#ocr-credentials)
+- [Project structure](#project-structure)
+- [Dataset](#dataset)
+- [References](#references)
+
+---
+
+## How it works
+
+Digitization runs in two steps:
+
+**Step 1 — Template extraction (`bee extract`)**
+A clean, averaged template is recovered from a batch of handwritten sample scans using feature matching (SIFT or ORB). The Hough line transform then detects the table grid and produces a cell map in JSON.
+
+**Step 2 — Digitization (`bee digitize`)**
+Each scan is aligned to the template, preprocessed to remove handwriting from the background, and passed to one or more OCR services. Recognized text is mapped back to individual cells and exported as a structured JSON record.
+
+---
 
 ## Quick start
 
-Let's start a test run on the BeeProject dataset. 
+Run the bundled sample dataset in three commands:
 
-Clone repository and navigate to the project: 
 ```shell
 git clone https://github.com/mertova/BeeProject.git
 cd BeeProject
+pip install -e .
 ```
 
 ```shell
+# Step 1 — extract template and table structure
+bee extract \
+  --dataset  resources/play-data/test_data_2014 \
+  --reference resources/form1/reference.png \
+  --output   resources/play-data/extracted_form
 
+# Step 2 — digitize the filled forms
+bee digitize \
+  --dataset     resources/play-data/test_data_2014 \
+  --output      resources/play-data/results \
+  --credentials resources/credentials/credentials_google.json \
+  --table       resources/play-data/extracted_form/table.json
 ```
 
------------------------------------
-## The BeeProject Collection
+---
 
-![The Workflow Scheme]( ./resources/readmeImgs/dataset.png "Dataset")
+## Installation
 
-The dataset we collected contains records from beekeepers, consisting of hive weight gain and loss 
-and meteorological conditions. The institute of bee protection from JKI  gathered this information from 
-the German beekeeper associations of Lower Saxony, Hesse, Mecklenburg-Vorpommern, Thuringia, and Brandenburg 
-in Germany within the collaborative research project MonViA. The sample of the dataset is available [here][1] and full 
-dataset can be accessed via [this link][2]. Please cite our dataset wit this citation: [[1]](#1).
+Requires Python 3.10 or newer.
 
-[1]: https://github.com/mertova/TheBeeProjectCollection.git        "GitHub: The BeeProject Collection - sample"
-[2]: https://fairdomhub.org/data_files/7415?version=1              "Fairdomhub: The BeeProject Collection - full"
-
------------------------------------
-## Digitize your data
-Supported formats. 
-
-Our source code is organized as follows: 
-```
-.
-├── resources
-│   ├── credentials                 # place to store your credentials 
-│   ├── data                        # place to store your data to be digitized
-│   └── play-data                   # a sample from our BeeProject collection     
-├── src
-│   ├── 
-│   ├──
-│   ├──
-│   └── 
-├── test                            # test files
-├── execute_digitalization.py       # 
-└── execute_extraction.py           #
-```
-1. place your data in 
-
-As shown in the picture above, the digitisation process consists of 2 steps: 
-### 1. Table extraction
 ```shell
-python execute_extraction.py 
-  - dataset
-  - output
-  - reference image
-  - 
+pip install -e .
 ```
 
+This registers the `bee` command globally in your environment. Verify with:
 
-| Flag | Full name   | Type | Default                      | Description                                                          |
-|------|-------------|------|------------------------------|----------------------------------------------------------------------|
-| -d   | --dataset   | str  | -                            | Path to the dataset                                                  |
-| -r   | --reference | str  | -                            | Path to the representative image                                     |
-| -ev  | --epsilon_v | int  | 10                           | Epsilon - deviation for a vertical grid lines                        |
-| -eh  | --epsilon_h | int  | 15                           | Epsilon - deviation for a horizontal grid lines                      |
-| -l   | --limit     | int  | 15                           | Limit the sample files for table extraction                          |
-| -t   | --transform | bool | True                         | Transformation (alignment) of sample resources to the reference file |
-| -o   | --output    | str  | ./resources/data/extraction/ | Path to the output folder                                            |
+```shell
+bee --help
+```
 
+---
 
- #### Output 
-1. Form image: 
+## CLI reference
 
-2. Json output example: 
+### `bee extract`
+
+Recovers a clean empty template from a batch of sample scans and detects the table grid.
+
+```
+bee extract -d DIR -r FILE [options]
+```
+
+| Flag | Long form | Type | Default | Description |
+|------|-----------|------|---------|-------------|
+| `-d` | `--dataset` | path | **required** | Directory of sample scan images (`.png`) |
+| `-r` | `--reference` | path | **required** | Representative reference image |
+| `-o` | `--output` | path | `./resources/data/extraction` | Output directory |
+| `-ev` | `--eps-v` | int | `15` | Epsilon for vertical grid lines |
+| `-eh` | `--eps-h` | int | `20` | Epsilon for horizontal grid lines |
+| `-l` | `--limit` | int | `15` | Maximum number of sample images to use |
+| `-a` | `--algo` | `sift`\|`orb` | `sift` | Feature matching algorithm |
+| | `--transform` / `--no-transform` | flag | on | Align samples to reference image |
+| | `--averaging` / `--no-averaging` | flag | on | Enable pen elimination via averaging |
+
+**Outputs** written to `--output`:
+
+| File | Description |
+|------|-------------|
+| `template.png` | Clean averaged form image |
+| `table.json` | Cell map with coordinates for every detected cell |
+
+---
+
+### `bee digitize`
+
+Aligns, preprocesses, and OCR-processes each scan. Maps recognized text to table cells.
+
+```
+bee digitize -d DIR -o DIR -c FILE -t FILE [options]
+```
+
+| Flag | Long form | Type | Default | Description |
+|------|-----------|------|---------|-------------|
+| `-d` | `--dataset` | path | **required** | Directory of filled form images (`.png`) |
+| `-o` | `--output` | path | **required** | Output directory for results |
+| `-c` | `--credentials` | path | **required** | OCR credentials `.json` file |
+| `-t` | `--table` | path | **required** | Table definition `.json` from the extract step |
+| | `--no-transform` | flag | off | Skip alignment to reference |
+| `-D` | `--debug` | flag | off | Save intermediate images to `output/debug/` |
+
+**Output** written to `--output`:
+
+| File | Description |
+|------|-------------|
+| `out_<dataset>.json` | Digitized records, keyed by image ID |
+| `debug/` | Preprocessed and annotated images (only with `-D`) |
+
+---
+
+## Output format
+
+### `table.json` — cell map
+
 ```json
 {
-  "cells": [{
-      "id": "A0",
-      "id_col": "0",
-      "id_row": "0",
-      "pt1": [0, 0],
-      "pt2": [71, 287]},
-    { "id": "B0",
-      "id_col": "1",
-      "id_row": "0",
-      "pt1": [71, 0],
-      "pt2": [211, 287]}, 
-    ...]
+  "template": "resources/play-data/extracted_form/template.png",
+  "shape": [8, 35],
+  "cells": [
+    { "text": "A0", "pt1": { "x": 0,  "y": 0   }, "pt2": { "x": 71,  "y": 287 } },
+    { "text": "B0", "pt1": { "x": 71, "y": 0   }, "pt2": { "x": 211, "y": 287 } }
+  ]
 }
 ```
-### 2. Digitization
-```shell
-python execute_extraction.py 
-  - dataset
-  - output
-  - reference image
-  - 
-```
 
+Cell identifiers follow spreadsheet notation: column letter + row number (`A0`, `B3`, `F12`, …).
 
-| Flag | Full name | Type | Default | Description                                 |
-|------|-----------|------|---------|---------------------------------------------|
-| -d   | dataset   | str  | -       | path to the dataset                         |
-| -o   | output    | str  | -       | path to the out folder                      |
-| -ref | reference | str  | -       | path to the representative image            |
-| -ev  | epsilon_v | int  | 10      | Raster for vertical lines                   |
-| -eh  | epsilon_h | int  | 15      | Raster for horizontal lines                 |
-| -l   | limit     | int  | 15      | limit the sample files for grid extraction  |
-| -t   | transform | bool | True    | Transformation (alignment) of sample images |
+### `out_<dataset>.json` — digitized records
 
-#### Output
-1. Form image: 
-
-2. Json output example: 
 ```json
 {
-  "cells": [{
-      "id": "A0",
-      "id_col": "0",
-      "id_row": "0",
-      "pt1": [0, 0],
-      "pt2": [71, 287]},
-    { "id": "B0",
-      "id_col": "1",
-      "id_row": "0",
-      "pt1": [71, 0],
-      "pt2": [211, 287]}, 
-    ...]
-}
-```
---------------------------------------------
-## Getting credentials from OCR Services
-
-In order to get better results, use following OCR APIs: Amazon AWS Textract, Google Vision, Microsoft Azure. 
-For each one of them you need to register and generate access keys.
-
-
-### - AWS Textract:
-AWS - Amazon Web Services 
-**textract** for text analysis. For more information, visit: https://docs.aws.amazon.com/textract/latest/dg/what-is.html
-
-For Boto3 python installation, visit: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html
-
-How to get credentials:
-https://docs.aws.amazon.com/textract/latest/dg/getting-started.html
-1. Get you account to the Amazon AWS Console via this link: https://aws.amazon.com
-2. Set up your Identity and Access Management (IAM)
-3. Find you key and endpoint (Note)
-
-
-#### Example of the credentials file
-```yaml
-{
-    "microsoft_api_key": {
-        "SUBSCRIPTION_KEY": "your key goes here",
-        "ENDPOINT": "https://your_project.cognitiveservices.azure.com/"
-    }
+  "1": {
+    "google": [
+      { "cell": "F3",  "text": "12.4", "confidence": 0.91 },
+      { "cell": "F4",  "text": "11.8", "confidence": 0.87 }
+    ],
+    "azure": [
+      { "cell": "F3",  "text": "12.4", "confidence": 0.95 }
+    ]
+  }
 }
 ```
 
-### - Google vision 
-1. create an account on Google Cloud: https://cloud.google.com/
-2. create a project
-3. and go to IAM & Admin and create a role: https://cloud.google.com/iam/docs/grant-role-console
-4. generate a json credentials file
+<!-- TODO: add annotated schema diagrams here -->
 
-Document Text detection documentation: https://cloud.google.com/vision/docs/handwriting
-All documentation is here: https://cloud.google.com/docs
+---
 
-#### Example of the credentials file
-```yaml
+## OCR credentials
+
+BeeProject supports three cloud OCR services and one local engine. Place credential files anywhere and point to them with `--credentials`.
+
+### Google Vision
+
+1. Create a project at [Google Cloud Console](https://cloud.google.com/)
+2. Enable the **Cloud Vision API**
+3. Create a service account and download the JSON key file
+4. Documentation: [Cloud Vision — Handwriting](https://cloud.google.com/vision/docs/handwriting)
+
+```json
 {
     "type": "service_account",
     "project_id": "your_project",
-    "private_key_id": "your key ID",
-    "private_key": "your key",
+    "private_key_id": "...",
+    "private_key": "-----BEGIN RSA PRIVATE KEY-----\n...",
     "client_email": "google-vision@your_project.iam.gserviceaccount.com",
-    "client_id": "client_id",
+    "client_id": "...",
     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
     "token_uri": "https://oauth2.googleapis.com/token",
     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
@@ -192,27 +199,85 @@ All documentation is here: https://cloud.google.com/docs
     "universe_domain": "googleapis.com"
 }
 ```
-### - Microsoft Azure
-Guide:
-https://programminghistorian.org/en/lessons/transcribing-handwritten-text-with-python-and-azure
 
-#### Example of the credentials file
+### Microsoft Azure Computer Vision
 
-Find your key and endpoint (Note: Check that your location is set correctly.)
-```yaml
+1. Create a Computer Vision resource in the [Azure Portal](https://portal.azure.com/)
+2. Copy your subscription key and endpoint
+3. Guide: [Transcribing handwritten text with Azure](https://programminghistorian.org/en/lessons/transcribing-handwritten-text-with-python-and-azure)
+
+```json
 {
     "microsoft_api_key": {
-        "SUBSCRIPTION_KEY": "your key goes here",
-        "ENDPOINT": "https://your_project.cognitiveservices.azure.com/"
+        "SUBSCRIPTION_KEY": "your_subscription_key",
+        "ENDPOINT": "https://your_resource.cognitiveservices.azure.com/"
     }
 }
 ```
 
---------------------------------------------
+### Amazon AWS Textract
 
-### References
-<a id="1">[1]</a> 
-Mertová, L., Lewkowski, O., Polreich, S., & Müller, W. (2024). 
-BeeProject-collection [Data set].
+1. Sign in to the [AWS Console](https://aws.amazon.com)
+2. Set up IAM with Textract permissions
+3. Generate an access key pair
+4. Documentation: [Getting started with Textract](https://docs.aws.amazon.com/textract/latest/dg/getting-started.html)
+
+```json
+{
+    "aws_access_key_id": "YOUR_KEY_ID",
+    "aws_secret_access_key": "YOUR_SECRET",
+    "region_name": "eu-central-1"
+}
+```
+
+### Tesseract (local, no credentials required)
+
+Install [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) locally. No credential file needed — pass any valid `.json` file as a placeholder.
+
+---
+
+## Project structure
+
+```
+BeeProject/
+├── resources/
+│   ├── credentials/            # OCR service credential files
+│   ├── data/                   # Extraction and digitization output
+│   └── play-data/              # Bundled sample dataset
+│       ├── test_data_2014/     # Sample scans
+│       └── extracted_form/     # Pre-computed template and table
+├── src/
+│   ├── cli.py                  # CLI entry point (bee command)
+│   ├── tsr.py                  # Table structure recognition
+│   ├── form_analysis.py        # Template extraction pipeline
+│   ├── digitize.py             # Digitization pipeline
+│   ├── geometry/               # Line, rectangle, vertex primitives
+│   ├── image_processing/       # Image, form, and reference processing
+│   ├── ocr_services/           # Google, Azure, AWS, Tesseract connectors
+│   └── table/                  # Table and cell data model
+├── test/                       # Unit tests
+├── pyproject.toml              # Package config and CLI entry point
+└── README.md
+```
+
+---
+
+## Dataset
+
+![BeeProject Collection](./resources/readmeImgs/dataset.png "Sample forms from the BeeProject Collection")
+
+The dataset contains beekeeping observation records collected by the **Institute of Bee Protection (JKI)** from beekeeper associations in Lower Saxony, Hesse, Mecklenburg-Vorpommern, Thuringia, and Brandenburg as part of the [MonViA](https://www.julius-kuehn.de/en/institute-for-bee-protection/) project.
+
+| Resource | Link |
+|----------|------|
+| Sample dataset | [GitHub — TheBeeProjectCollection](https://github.com/mertova/TheBeeProjectCollection.git) |
+| Full dataset | [FAIRDOMHub](https://fairdomhub.org/data_files/7415?version=1) |
+
+---
+
+## References
+
+<a id="1">[1]</a>
+Mertová, L., Lewkowski, O., Polreich, S., & Müller, W. (2024).
+*BeeProject-collection* [Data set].
 FAIRDOMHub. https://doi.org/10.15490/FAIRDOMHUB.1.DATAFILE.7415.1
-
