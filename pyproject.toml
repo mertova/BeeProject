@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "beeproject"
+version = "0.1.0"
+description = "Digitization of tabular forms from scanned images"
+requires-python = ">=3.10"
+dependencies = [
+    "opencv-python",
+    "numpy",
+    "pdf2image",
+    "Pillow",
+    "boto3",
+    "google-cloud-vision",
+    "google-auth",
+    "azure-cognitiveservices-vision-computervision",
+    "msrest",
+    "pytesseract",
+]
+
+[project.scripts]
+bee = "cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
