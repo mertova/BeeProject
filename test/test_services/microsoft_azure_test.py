@@ -26,7 +26,7 @@ class MicrosoftTest(OcrTest):
     @classmethod
     def setUpClass(cls):
         # load credentials
-        credentials = "C:/Users/lmert/PhD/BeeProject/BeeProject/data/credentials_microsoft.json"
+        credentials = "C:/Users/lmert/PhD/BeeProject/BeeProject/resources/credentials_microsoft.json"
         try:
             with open(credentials) as credentials_file:
                 credentials = json.load(credentials_file)

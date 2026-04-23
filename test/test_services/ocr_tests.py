@@ -8,7 +8,7 @@ from table.annotations import OcrAnnotation
 
 class OcrTest(unittest.TestCase):
     # change if needed
-    debug_path = Path('../results/7/ocr/')
+    debug_path = Path('../resources/results/7/ocr/')
 
     @classmethod
     def setUpClass(cls):

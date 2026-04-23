@@ -1,9 +1,17 @@
+import json
 import unittest
+from pathlib import Path
+
+import cv2
 
 from geometry.vertex import Vertex
+from ocr_services import call_services
+from ocr_services.google_vision import GoogleVision
+from table import annotations
 
 from table.annotations import OcrAnnotation, CellAnnotation
 from table.cell import Cell
+from table.table import Table
 
 
 class AnnotationsTest(unittest.TestCase):
@@ -69,10 +77,48 @@ class AnnotationsTest(unittest.TestCase):
         pass
 
     def test_compose_cell_annotations(self):
-        pass
+        scan = cv2.imread('../resources/form1/samples/1.png')
+        scan_stream = call_services.get_stream_img(scan)
+        credentials = Path("/credentials/credentials_google.json")
+        gv = GoogleVision(credentials.absolute())
+        ocr_annotations = gv.detect_document(scan_stream)
+
+        table_path = Path("/resources/LHI-final/form1_table_31.json")
+        with open(table_path.as_posix(), 'r') as data:
+            table_json = json.load(data)
+            table = Table()
+            table.import_json(table_json)
+            data.close()
+        intervals = ['H3', 'I3', 'I4']
+        table.activate(intervals)
+
+        sorted_ocr_annotations = annotations.sort_ocr_annotations(ocr_annotations, table)
+
+        # test
+        for c, a in sorted_ocr_annotations.items():
+            result = annotations.compose_cell_annotations(c, a)
+            print(result)
 
     def test_sort_ocr_annotations(self):
-        pass
+        scan = cv2.imread('../resources/form1/samples/1.png')
+        scan_stream = call_services.get_stream_img(scan)
+        credentials = Path("/credentials/credentials_google.json")
+        gv = GoogleVision(credentials.absolute())
+        ocr_annotations = gv.detect_document(scan_stream)
+
+        table_path = Path("/resources/LHI-final/form1_table_31.json")
+        with open(table_path.as_posix(), 'r') as data:
+            table_json = json.load(data)
+            table = Table()
+            table.import_json(table_json)
+            data.close()
+        intervals = ['H3', 'I3', 'I4']
+        table.activate(intervals)
+
+        # test
+        result = annotations.sort_ocr_annotations(ocr_annotations, table)
+
+        print(result)
 
 
 if __name__ == '__main__':

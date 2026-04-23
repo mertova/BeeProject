@@ -39,16 +39,16 @@ class TableTest(unittest.TestCase):
         given_cell = Cell(5, 3, pt1, pt2)
 
         # when
-        actual_json = given_cell.__dict__()
+        actual_json = given_cell.to_dict()
 
         # then
         cell_id = 'D5'
-        expected_json = {'text': cell_id, 'pt1': pt1.__dict__(), 'pt2': pt2.__dict__()}
+        expected_json = {'text': cell_id, 'pt1': pt1.to_dict(), 'pt2': pt2.to_dict()}
         self.assertEqual(actual_json, expected_json)
         print(actual_json)
 
     def test_export_table_json(self):
-        cells = [self.cell1.__dict__(), self.cell2.__dict__(), self.cell3.__dict__(), self.cell4.__dict__()]
+        cells = [self.cell1.to_dict(), self.cell2.to_dict(), self.cell3.to_dict(), self.cell4.to_dict()]
         expected_json = {'template': None, 'cells': cells, 'shape': tuple(self.table.shape)}
         # when
         self.table.export_json(Path("./"))
@@ -78,7 +78,7 @@ class TableTest(unittest.TestCase):
             with open(Path("./table.json"), "r") as f:
                 new_table.import_json(json.load(f))
         except FileNotFoundError:
-            print("File to import not found: table.json")
+            print("File to import not found: form1_table_31.json")
 
         self.assertEqual(self.table, new_table)
 

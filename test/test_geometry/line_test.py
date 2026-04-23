@@ -1,5 +1,8 @@
 import unittest
 
+import cv2
+import numpy as np
+
 from geometry.line import Line
 from geometry.vertex import Vertex
 
@@ -180,6 +183,16 @@ class LineTest(unittest.TestCase):
         print(intersections)
         self.assertIsNotNone(intersections)
         self._assertTupleAlmostEqual(intersections, results, 2, "Intersections are not correct")
+
+    def test_render(self):
+        line = Line(Vertex(50, 50), Vertex(150, 50))
+        blank_canvas = np.zeros((300, 200, 3), np.uint8)
+
+        line_img = line.render(blank_canvas, (200, 200, 100))
+        cv2.imshow("line_img", line_img)
+        cv2.waitKey(0)
+
+        self.assertTrue(np.array_equal(line_img.shape, (300, 200, 3)))
 
 
 if __name__ == '__main__':

@@ -38,7 +38,7 @@ class VertexTest(unittest.TestCase):
 
     def test_dist(self):
         vertex = Vertex(2, 7)
-        vertex_json = vertex.__dict__()
+        vertex_json = vertex.to_dict()
         expected_dict = {'x': 2, 'y': 7}
         self.assertEqual(expected_dict, vertex_json)
 

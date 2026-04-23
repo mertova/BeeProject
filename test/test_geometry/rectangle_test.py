@@ -17,9 +17,6 @@ def show_rectangle_and_point(rectangle: Rectangle, point: Vertex, caption: str):
 
 class RectangleTest(unittest.TestCase):
 
-    def setUp(self):
-        pass
-
     def test_constructor(self):
         # given
         pt1 = Vertex(0, 0)
