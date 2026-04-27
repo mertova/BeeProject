@@ -1,11 +1,21 @@
 # BeeProject
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Paper](https://img.shields.io/badge/JCDL'24-10.1145/3677389.3702599-b31b1b.svg)](https://doi.org/10.1145/3677389.3702599)
+[![Dataset](https://img.shields.io/badge/dataset-FAIRDOMHub-1abc9c.svg)](https://doi.org/10.15490/FAIRDOMHUB.1.DATAFILE.7415.1)
+
 **Semi-automated digitization of historical handwritten tabular records.**
 
-BeeProject combines computer vision and optical character recognition (OCR) to detect the grid structure of scanned paper forms and extract their handwritten content into structured JSON. It was developed to digitize beekeeping observation records collected across Germany as part of the MonViA research project.
+Reference implementation for the JCDL'24 paper *The BeeProject: Advanced Digitisation and Creation of a Dataset for the Monitoring of Beehives* [[1]](#references). BeeProject combines feature-based image alignment, Hough-transform grid detection, and cloud OCR to recover structured records from scanned paper forms — a setting where layout is irregular, ink degrades, and modern table-extraction models trained on born-digital PDFs fall over.
 
-![Workflow]( ./resources/readmeImgs/workflow.png "Two-step digitization workflow")
+The pipeline was developed to digitize beekeeping observation records collected across five German states (Lower Saxony, Hesse, Mecklenburg-Vorpommern, Thuringia, Brandenburg) by the Institute of Bee Protection (JKI) under the [MonViA](https://www.julius-kuehn.de/en/institute-for-bee-protection/) project. The released ground-truth covers **3,819 scans and 30,552 annotated cells from 1998–2017**. On this benchmark the pipeline achieves **CER ≈ 5%** and **WER ≈ 13%** with TrOCR or Google Vision as the OCR backend, with SIFT-based alignment correctly registering 95% of forms.
 
+> *Status: maintained for reproducibility of the JCDL'24 paper. Issues and PRs welcome.*
+
+<p align="center">
+  <img src="resources/readmeImgs/workflow.png" alt="Two-step digitization workflow" width="720">
+</p>
 ---
 
 ## Contents
