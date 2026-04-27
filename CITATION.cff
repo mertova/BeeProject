@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the JCDL'24 paper."
+title: "BeeProject"
+authors:
+  - family-names: "Mertová"
+    given-names: "Lukrécia"
+    orcid: "https://orcid.org/0000-0002-7585-4479"
+  - family-names: "Polreich"
+    given-names: "Severin"
+  - family-names: "Lewkowski"
+    given-names: "Oleg"
+  - family-names: "Müller"
+    given-names: "Wolfgang"
+license: MIT
+repository-code: "https://github.com/mertova/BeeProject"
+preferred-citation:
+  type: conference-paper
+  title: "The BeeProject: Advanced Digitisation and Creation of a Dataset for the Monitoring of Beehives"
+  authors:
+    - family-names: "Mertová"
+      given-names: "Lukrécia"
+    - family-names: "Polreich"
+      given-names: "Severin"
+    - family-names: "Lewkowski"
+      given-names: "Oleg"
+    - family-names: "Müller"
+      given-names: "Wolfgang"
+  conference:
+    name: "ACM/IEEE Joint Conference on Digital Libraries (JCDL '24)"
+  year: 2024
+  doi: "10.1145/3677389.3702599"
