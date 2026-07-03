@@ -1,6 +1,6 @@
 from geometry.rectangle import Rectangle
 from geometry.vertex import Vertex
-from src.table.cell import Cell
+from table.cell import Cell
 
 
 class OcrAnnotation(Rectangle):
@@ -42,7 +42,7 @@ class CellAnnotation:
     def __str__(self):
         return f"{self.cell}: \"{self.text}\" conf: {self.confidence}"
 
-    def __dict__(self):
+    def to_dict(self):
         return {"cell": self.cell, "text": self.text, "confidence": self.confidence}
 
 

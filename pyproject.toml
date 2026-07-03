@@ -20,6 +20,12 @@ dependencies = [
     "pytesseract",
 ]
 
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "parameterized",
+]
+
 [project.scripts]
 bee = "cli:main"
 

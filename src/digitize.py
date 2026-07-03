@@ -5,22 +5,23 @@ import cv2
 from image_processing.image import Image
 from image_processing.reference import Reference
 from ocr_services.call_services import call_services, render_annotations
-from src.table.table import Table
-from src.table.cell import decode_index
-from src.table.annotations import compose_cell_annotations, sort_ocr_annotations
+from table.table import Table
+from table.cell import decode_index
+from table.annotations import compose_cell_annotations, sort_ocr_annotations
 
 
 class Digitize:
-    eps = 5
     intervals: list[(str, str)]
+    service: str
     credentials: Path
     table: Table
     reference: Reference
     debug_dir: Path | None
 
-    def __init__(self, table: Table, reference: Reference, intervals: list[(str, str)], credentials: Path,
-                 debug_dir=None, transform=True):
+    def __init__(self, table: Table, reference: Reference, intervals: list[(str, str)], service: str,
+                 credentials: Path, debug_dir=None, transform=True):
         self.intervals = intervals
+        self.service = service
         self.credentials = credentials
         self.table = table
         self.reference = reference
@@ -43,11 +44,11 @@ class Digitize:
             cv2.imwrite((path/f"{i}.jpg").as_posix(), preprocessed)
 
         # print("Annotating image ", index)
-        services_result = call_services(self.credentials, preprocessed)
+        services_result = call_services(self.service, self.credentials, preprocessed)
         if self.debug_dir is not None:
             path = self.debug_dir / "annotated"
             path.mkdir(exist_ok=True, parents=True)
-            render_annotations((path/f"{i}.jpg").as_posix(), services_result['google'], preprocessed,
+            render_annotations((path/f"{i}.jpg").as_posix(), services_result[self.service], preprocessed,
                                with_text=True)
 
         # print("Postprocessing annotations ...")
@@ -72,13 +73,9 @@ class Digitize:
         return results
 
     def _preprocessing(self, img, transform):
-        # todo refactor
         if transform:
             img = self.reference.map_img_to_ref(img)
 
-        # Using cv2.erode() method
-        self.reference.erode(2)
-        self.reference.sharpening()
         scan = Image(img)
         scan.preprocessing(self.reference.get_inverse())
         return scan.get_grey()

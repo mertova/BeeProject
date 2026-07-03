@@ -1,4 +1,3 @@
-import os
 import unittest
 from pathlib import Path
 
@@ -6,6 +5,8 @@ import cv2
 import numpy as np
 
 from image_processing.image import Image
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 class TestImage(unittest.TestCase):
@@ -16,16 +17,14 @@ class TestImage(unittest.TestCase):
     nparray_color = None
     out_path = None
     sample_img_path = None
-    test_root_path = None
+    test_root_path = REPO_ROOT / "test"
 
     @classmethod
     def setUpClass(cls):
-        cls.test_root_path = Path(os.getcwd()).parents[0]
-
-        cls.out_path = cls.test_root_path / "resources/results/test_image/"
+        cls.out_path = REPO_ROOT / "test" / "results" / "test_image"
         cls.out_path.mkdir(parents=True, exist_ok=True)
 
-        cls.sample_img_path = cls.test_root_path / "resources/scans/1.png"
+        cls.sample_img_path = REPO_ROOT / "test" / "resources" / "form1" / "samples" / "1.png"
         if not cls.sample_img_path.is_file():
             raise FileNotFoundError("No image, path " + cls.sample_img_path.absolute().as_posix() + " is incorrect")
 

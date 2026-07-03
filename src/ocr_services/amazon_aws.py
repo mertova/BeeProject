@@ -13,6 +13,7 @@ def _process_output(outputs, img_width, img_height):
         if item['BlockType'] in ['WORD']:
             # Extract the text
             text = item.get('Text', '')
+            confidence = item.get('Confidence', 0) / 100
 
             # Extract the bounding box coordinates
             box = item.get('Geometry', {}).get('BoundingBox', {})
@@ -28,22 +29,19 @@ def _process_output(outputs, img_width, img_height):
             bottom_right = Vertex(abs_left + abs_width, abs_top + abs_height)
 
             # Append the extracted resources to the list
-            identified.append(OcrAnnotation(top_left, bottom_right, text))
+            identified.append(OcrAnnotation(top_left, bottom_right, text, confidence))
 
     return identified
 
 
 class Aws:
-    # todo AWS not working - user problems at cloud
     def __init__(self, amazon_credentials):
         self.client = boto3.client('textract',
                                    aws_access_key_id=amazon_credentials['ACCESS_KEY'],
                                    aws_secret_access_key=amazon_credentials['SECRET_KEY'],
                                    region_name=amazon_credentials['REGION'])
 
-    def annotate_image(self, image_stream):
+    def detect_document(self, image_stream, img_width, img_height) -> list[OcrAnnotation]:
         image = image_stream.getvalue()
         response = self.client.detect_document_text(Document={'Bytes': bytearray(image)})
-        return _process_output(response)
-
-
+        return _process_output(response, img_width, img_height)

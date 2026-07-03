@@ -2,7 +2,7 @@ from google.cloud import vision_v1
 from google.oauth2 import service_account
 
 from geometry.vertex import Vertex
-from src.table.annotations import OcrAnnotation
+from table.annotations import OcrAnnotation
 
 
 def _process_output(response) -> list[OcrAnnotation]:

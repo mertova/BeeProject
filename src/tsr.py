@@ -135,5 +135,5 @@ class Tsr:
 
     def _debug_render_points(self, canvas, points):
         for point in points:
-            canvas = cv2.circle(canvas, point.asTuple(), 2,  (0, 140, 255))
+            canvas = cv2.circle(canvas, point.as_tuple(), 2,  (0, 140, 255))
         return canvas

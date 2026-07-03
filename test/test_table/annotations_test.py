@@ -2,16 +2,15 @@ import json
 import unittest
 from pathlib import Path
 
-import cv2
-
 from geometry.vertex import Vertex
-from ocr_services import call_services
-from ocr_services.google_vision import GoogleVision
 from table import annotations
 
 from table.annotations import OcrAnnotation, CellAnnotation
 from table.cell import Cell
 from table.table import Table
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+TABLE_JSON = REPO_ROOT / "test" / "resources" / "form1" / "form1_table_31.json"
 
 
 class AnnotationsTest(unittest.TestCase):
@@ -76,49 +75,41 @@ class AnnotationsTest(unittest.TestCase):
     def test_add_snippet(self):
         pass
 
-    def test_compose_cell_annotations(self):
-        scan = cv2.imread('../resources/form1/samples/1.png')
-        scan_stream = call_services.get_stream_img(scan)
-        credentials = Path("/credentials/credentials_google.json")
-        gv = GoogleVision(credentials.absolute())
-        ocr_annotations = gv.detect_document(scan_stream)
-
-        table_path = Path("/resources/LHI-final/form1_table_31.json")
-        with open(table_path.as_posix(), 'r') as data:
-            table_json = json.load(data)
+    def _load_table(self):
+        with open(TABLE_JSON, 'r') as data:
             table = Table()
-            table.import_json(table_json)
-            data.close()
-        intervals = ['H3', 'I3', 'I4']
-        table.activate(intervals)
+            table.import_json(json.load(data))
+        table.activate(['H3', 'I3', 'I4'])
+        return table
 
+    def test_compose_cell_annotations(self):
+        table = self._load_table()
+        # a couple of synthetic OCR hits landing inside cell H3, matching its pt1/pt2 bounds
+        h3 = next(c for c in table.get_cells() if c.text == 'H3')
+        mid_x = (h3.pt1.x + h3.pt2.x) // 2
+        mid_y = (h3.pt1.y + h3.pt2.y) // 2
+        ocr_annotations = [
+            OcrAnnotation(Vertex(mid_x - 5, mid_y - 5), Vertex(mid_x, mid_y), "12", 0.9),
+            OcrAnnotation(Vertex(mid_x, mid_y), Vertex(mid_x + 5, mid_y + 5), ".4", 0.85),
+        ]
         sorted_ocr_annotations = annotations.sort_ocr_annotations(ocr_annotations, table)
 
         # test
         for c, a in sorted_ocr_annotations.items():
-            result = annotations.compose_cell_annotations(c, a)
-            print(result)
+            result = annotations.compose_cell_annotations(c, a, 0.75)
+            self.assertEqual(type(result), CellAnnotation)
 
     def test_sort_ocr_annotations(self):
-        scan = cv2.imread('../resources/form1/samples/1.png')
-        scan_stream = call_services.get_stream_img(scan)
-        credentials = Path("/credentials/credentials_google.json")
-        gv = GoogleVision(credentials.absolute())
-        ocr_annotations = gv.detect_document(scan_stream)
-
-        table_path = Path("/resources/LHI-final/form1_table_31.json")
-        with open(table_path.as_posix(), 'r') as data:
-            table_json = json.load(data)
-            table = Table()
-            table.import_json(table_json)
-            data.close()
-        intervals = ['H3', 'I3', 'I4']
-        table.activate(intervals)
+        table = self._load_table()
+        h3 = next(c for c in table.get_cells() if c.text == 'H3')
+        mid_x = (h3.pt1.x + h3.pt2.x) // 2
+        mid_y = (h3.pt1.y + h3.pt2.y) // 2
+        ocr_annotations = [OcrAnnotation(Vertex(mid_x - 2, mid_y - 2), Vertex(mid_x, mid_y), "12", 0.9)]
 
         # test
         result = annotations.sort_ocr_annotations(ocr_annotations, table)
-
-        print(result)
+        self.assertIn('H3', result)
+        self.assertEqual(len(result['H3']), 1)
 
 
 if __name__ == '__main__':

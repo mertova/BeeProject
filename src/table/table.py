@@ -3,7 +3,7 @@ import json
 
 import numpy
 
-from src.table.cell import Cell
+from table.cell import Cell
 
 
 class Table:
@@ -95,4 +95,4 @@ class Table:
         return False
 
     def __hash__(self):
-        return hash(self._cells)
+        return hash(tuple(self._cells))
