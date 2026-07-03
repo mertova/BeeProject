@@ -27,13 +27,16 @@ class CellAnnotation:
 
     def __init__(self, cell: str):
         self.cell = cell
+        self._confidence_count = 0
 
     def concatenate_text_confidence(self, text: str, confidence: float):
         self.text += text
         if self.confidence is not None:
-            self.confidence = (self.confidence + confidence) / 2
+            self._confidence_count += 1
+            self.confidence += (confidence - self.confidence) / self._confidence_count
         else:
             self.confidence = confidence
+            self._confidence_count = 1
 
     def add_snippet(self, img):
         # todo impossible if cell attribute is not cell but cell id

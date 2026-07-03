@@ -2,10 +2,9 @@ import cv2
 
 
 def test_input(n):
-    # todo
     try:
-        n = int(n)
-    except ValueError:
+        n = int(round(float(n)))
+    except (TypeError, ValueError):
         raise ValueError("vertex coordinate must be an integer")
     return n
 
