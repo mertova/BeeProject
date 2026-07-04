@@ -5,9 +5,9 @@ import numpy as np
 
 class Image:
 
-    __color: np.array
-    __grey: np.array
-    __inverse: np.array
+    _color: np.array
+    _grey: np.array
+    _inverse: np.array
 
     def __init__(self, image):
         if image is None or type(image) is not numpy.ndarray:
@@ -59,15 +59,6 @@ class Image:
         self.__threshold2()
         self.__sharpening()
         self.__filter_speckles()
-        """
-        self.add_contrast()
-        self.sharpening()
-        self.erode()
-
-        self.threshold()
-        self.filter_speckles()
-        self.sharpening()
-        """
 
     def __threshold(self):
         ret, thresh = cv2.threshold(self._inverse, 100, 255, cv2.THRESH_TOZERO)

@@ -2,10 +2,9 @@ import cv2
 
 
 def test_input(n):
-    # todo
     try:
-        n = int(n)
-    except ValueError:
+        n = int(round(float(n)))
+    except (TypeError, ValueError):
         raise ValueError("vertex coordinate must be an integer")
     return n
 
@@ -20,9 +19,9 @@ class Vertex:
 
     def is_more_than(self, other):
         """
-        Checks if the vertex coordinates are less than the other vertex coordinates.First check x coordinates, then y.
+        Checks if the vertex coordinates are greater than the other vertex coordinates. First check x coordinates, then y.
         :param other: Other vertex
-        :return: True is self.x is more than other.x. If x coordinates are equal, check if y coordinates are more than
+        :return: True if self.x is more than other.x. If x coordinates are equal, check if y coordinates are more than
         other.y
         """
         if self.x > other.x:

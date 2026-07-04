@@ -2,16 +2,21 @@ import json
 import unittest
 from pathlib import Path
 
-import cv2
 import numpy as np
 
 from geometry.vertex import Vertex
 from table.cell import Cell
 from table.table import Table
 
+OUTPUT_DIR = Path(__file__).resolve().parents[1] / "results" / "table"
+
 
 class TableTest(unittest.TestCase):
     blank_canvas = np.zeros((300, 500, 3), np.uint8)
+
+    @classmethod
+    def setUpClass(cls):
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     # cell left up
     pt1_cell1 = Vertex(20, 50)
@@ -51,9 +56,9 @@ class TableTest(unittest.TestCase):
         cells = [self.cell1.to_dict(), self.cell2.to_dict(), self.cell3.to_dict(), self.cell4.to_dict()]
         expected_json = {'template': None, 'cells': cells, 'shape': tuple(self.table.shape)}
         # when
-        self.table.export_json(Path("./"))
+        self.table.export_json(OUTPUT_DIR)
         # then
-        with open(Path("./table.json"), "r") as f:
+        with open(OUTPUT_DIR / "table.json", "r") as f:
             actual_json = json.load(f)
         actual_json['shape'] = tuple(self.table.shape)
         self.assertEqual(expected_json, actual_json)
@@ -75,17 +80,15 @@ class TableTest(unittest.TestCase):
     def test_import_table_json(self):
         new_table = Table()
         try:
-            with open(Path("./table.json"), "r") as f:
+            with open(OUTPUT_DIR / "table.json", "r") as f:
                 new_table.import_json(json.load(f))
         except FileNotFoundError:
-            print("File to import not found: form1_table_31.json")
+            print("File to import not found: table.json (run test_export_table_json first)")
 
         self.assertEqual(self.table, new_table)
 
     def test_render_table(self):
         img = self.table.render(self.blank_canvas, False, True)
-        cv2.imshow('table', img)
-        cv2.waitKey(0)
 
         self.assertEqual(img.shape, (300, 500, 3))
 

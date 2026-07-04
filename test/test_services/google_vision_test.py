@@ -8,22 +8,21 @@ from ocr_services.google_vision import GoogleVision
 from parameterized import parameterized
 from test.test_services.ocr_tests import OcrTest
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+CREDENTIALS = REPO_ROOT / "resources" / "credentials" / "credentials_google.json"
+SAMPLE_IMAGE = REPO_ROOT / "test" / "resources" / "form1" / "samples" / "1.png"
 
+
+@unittest.skipUnless(CREDENTIALS.is_file(), f"Google credentials not found at {CREDENTIALS}")
 class GoogleTest(OcrTest):
     service: GoogleVision
 
     @classmethod
     def setUpClass(cls):
-        # load credentials
-        credentials = Path("../../resources/credentials/credentials_google.json")
-        if credentials.is_file():
-            cls.service = GoogleVision(credentials)
-            super(GoogleTest, cls).setUpClass()
-        else:
-            print("Credentials file not found")
-            exit(1)
+        cls.service = GoogleVision(CREDENTIALS)
+        super(GoogleTest, cls).setUpClass()
 
-    @parameterized.expand([("test_form1", "C:/Users/lmert/PhD/BeeProject/BeeProject-dataset/SIFT_final_31_empty/2016/1.png", "2016-1")])
+    @parameterized.expand([("test_form1", str(SAMPLE_IMAGE), "form1-1")])
     def test_ocr(self, name, path, index):
         # image array to stream
         image = cv2.imread(path)

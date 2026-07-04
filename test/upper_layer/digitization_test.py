@@ -1,7 +1,6 @@
 import json
 import os
-
-import sys
+import time
 import unittest
 from pathlib import Path
 
@@ -9,31 +8,24 @@ import cv2
 
 from digitize import Digitize
 from image_processing.reference import Reference
-from src.table.table import Table
-from ocr_services.google_vision import GoogleVision
-import time
+from table.table import Table
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+LHI_TABLE_JSON = REPO_ROOT / "resources" / "LHI-final" / "table.json"
+LHI_REFERENCE_IMG = REPO_ROOT / "resources" / "LHI-final" / "form_contrasted_31.png"
+GOOGLE_CREDENTIALS = REPO_ROOT / "resources" / "credentials" / "credentials_google.json"
+MICROSOFT_CREDENTIALS = REPO_ROOT / "resources" / "credentials" / "credentials_microsoft.json"
+# Author's private working dataset - never shipped with this repo. The tests below that
+# use it are local-only integration smoke tests and will always skip on a fresh clone.
+PRIVATE_DATASET = Path("C:/Users/lmert/PhD/BeeProject/BeeProject-dataset/SIFT_final_31_empty-no-1998/")
 
 
 class DigitizeTest(unittest.TestCase):
-    table_form1 = Table
-    debug_path = Path("resources/results/14/digitize/")
-    # credentials = Path("../resources/credentials_microsoft.json")
+    intervals = [('F3', 'I35')]
 
-    @classmethod
-    def setUpClass(cls):
-        cls.debug_path.mkdir(exist_ok=True, parents=True)
-        """
-        with file_form1:
-            json_form1 = json.load(file_form1)
-            cls.table_form1 = Table()
-            cls.table_form1.import_json(json_form1)
-            ref_img = cv2.imread(json_form1["template"])
-            cls.template = Reference(ref_img)
-        """
     def test_decode_intervals(self):
-        # given
-        intervals = [('F3', 'I35')]
-        digitize = Digitize(self.table_form1, self.template, intervals, self.credentials)
+        # given: decode_intervals is pure logic and doesn't touch table/reference/credentials
+        digitize = Digitize(None, None, self.intervals, 'google', None)
 
         # when
         actual_indexes = digitize.decode_intervals()
@@ -48,140 +40,73 @@ class DigitizeTest(unittest.TestCase):
         self.assertSetEqual(expected_indexes, actual_indexes)
 
     def test_decode_intervals_empty(self):
-        # given
-        intervals = []
-        digitize = Digitize(self.table_form1, self.template, intervals, self.credentials)
-
-        # when
+        digitize = Digitize(None, None, [], 'google', None)
         actual_indexes = digitize.decode_intervals()
-
-        # then
-        expected_indexes = set()
-        self.assertSetEqual(expected_indexes, actual_indexes)
+        self.assertSetEqual(set(), actual_indexes)
 
     def test_decode_intervals_none(self):
-        digitize = Digitize(self.table_form1, self.template, None, self.credentials)
+        digitize = Digitize(None, None, None, 'google', None)
         self.assertRaises(TypeError, digitize.decode_intervals)
 
+
+@unittest.skipUnless(PRIVATE_DATASET.is_dir(), "author's private local dataset not present")
+class DigitizeIntegrationTest(unittest.TestCase):
+    """
+    Local-only smoke tests against the full-size unpublished dataset used during
+    development of the JCDL'24 paper. Not runnable outside the author's machine.
+    """
+
+    debug_path = REPO_ROOT / "test" / "results" / "digitize"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.debug_path.mkdir(exist_ok=True, parents=True)
+        with open(LHI_TABLE_JSON, 'r') as data:
+            cls.table = Table()
+            cls.table.import_json(json.load(data))
+        cls.reference = Reference(cv2.imread(LHI_REFERENCE_IMG.as_posix()), 'sift')
+
+    @unittest.skipUnless(GOOGLE_CREDENTIALS.is_file(), "Google credentials not found")
     def test_digitize_2016_1(self):
-        # given
         intervals = ['H3', 'I3', 'I4']
-
-        table_path = Path("../../resources/LHI-final/table.json")
-        with open(table_path.as_posix(), 'r') as data:
-            table_json = json.load(data)
-            table = Table()
-            table.import_json(table_json)
-            data.close()
-        reference_img = cv2.imread("../../resources/LHI-final/form_contrasted_31.png")
-        reference = Reference(reference_img)
-
-        credentials = Path("../../resources/credentials/credentials_google.json")
-
-        # test
-        scan = Path("C:/Users/lmert/PhD/BeeProject/BeeProject-dataset/SIFT_final_31_empty/2016/1.png")
-        digit = Digitize(table, reference, intervals, credentials, debug_dir=Path("resources/results/12/ocr"), transform=False)
+        scan = PRIVATE_DATASET.parent / "SIFT_final_31_empty" / "2016" / "1.png"
+        digit = Digitize(self.table, self.reference, intervals, 'google', GOOGLE_CREDENTIALS,
+                         debug_dir=self.debug_path / "2016-1", transform=False)
 
         result = digit.run(scan, 0)
-        print(result)
+        self.assertIsNotNone(result)
 
+    @unittest.skipUnless(GOOGLE_CREDENTIALS.is_file(), "Google credentials not found")
     def test_digitize_form1_google(self):
-        # given
-        intervals = [('C3', 'K35')]
-        dataset = Path("C:/Users/lmert/PhD/BeeProject/BeeProject-dataset/SIFT_final_31_empty-no-1998/")
-        # dataset = Path("./scans/LHI-transformed-Samples")
-        table_path = Path("../../resources/LHI-final/table.json")
-        with open(table_path.as_posix(), 'r') as data:
-            table_json = json.load(data)
-            table = Table()
-            table.import_json(table_json)
-            data.close()
-        reference_img = cv2.imread("../../resources/LHI-final/form_contrasted_31.png")
-        reference = Reference(reference_img)
+        self._digitize_dataset('google', GOOGLE_CREDENTIALS)
 
-        credentials = Path("../../resources/credentials/credentials_google.json")
-
-        # test
-        digit = Digitize(table, reference, intervals, credentials, debug_dir=None,
-                         transform=False)
-
-        times = []
-        record_json = {}
-        for folder in os.listdir(dataset.as_posix()):
-            self.debug_path.joinpath("google").mkdir(exist_ok=True, parents=True)
-            json_result_path = self.debug_path / "google" / (folder + "-results-google.json")
-            folder_path = Path(dataset.as_posix()) / folder
-            p = folder_path.glob('**/*.png')
-            i = 0
-            with open(json_result_path.as_posix(), "w") as result_file:
-                for x in p:
-                    print(str(i) + " processing scan: " + str(x.name))
-                    if x.is_file():
-                        scan_id = x.stem
-                        t_start = time.time()
-                        json_result = digit.run(x, scan_id)
-                        elapsed = t_start - time.time()
-                        times.append(elapsed)
-                        record_json[scan_id] = json_result
-                        i += 1
-                    else:
-                        print("File " + x.name + " is not file")
-                json.dump(record_json, result_file, sort_keys=True, indent=4)
-                record_json = {}
-
-        print("Time taken: " + str(time.time() - t_start))
-        print("Average time: " + str(sum(times) / len(times)))
-        print("All times: " + str(times))
-
+    @unittest.skipUnless(MICROSOFT_CREDENTIALS.is_file(), "Azure credentials not found")
     def test_digitize_form1_microsoft(self):
-        # given
+        self._digitize_dataset('azure', MICROSOFT_CREDENTIALS)
+
+    def _digitize_dataset(self, service, credentials):
         intervals = [('C3', 'K35')]
-        dataset = Path("C:/Users/lmert/PhD/BeeProject/BeeProject-dataset/SIFT_final_31_empty-no-1998/")
-        # dataset = Path("./scans/LHI-transformed-Samples")
-        table_path = Path("../../resources/LHI-final/table.json")
-        with open(table_path.as_posix(), 'r') as data:
-            table_json = json.load(data)
-            table = Table()
-            table.import_json(table_json)
-            data.close()
-        reference_img = cv2.imread("../../resources/LHI-final/form_contrasted_31.png")
-        reference = Reference(reference_img)
-
-        credentials = Path("../../resources/credentials/credentials_microsoft.json")
-
-        # test
-        digit = Digitize(table, reference, intervals, credentials, debug_dir=None,
+        digit = Digitize(self.table, self.reference, intervals, service, credentials, debug_dir=None,
                          transform=False)
 
         times = []
-        record_json = {}
-        for folder in os.listdir(dataset.as_posix()):
-            self.debug_path.joinpath("microsoft").mkdir(exist_ok=True, parents=True)
-            json_result_path = self.debug_path / "microsoft" / (folder + "-results-microsoft.json")
-            folder_path = Path(dataset.as_posix()) / folder
-            p = folder_path.glob('**/*.png')
-            i = 0
+        for folder in os.listdir(PRIVATE_DATASET.as_posix()):
+            out_dir = self.debug_path / service
+            out_dir.mkdir(exist_ok=True, parents=True)
+            json_result_path = out_dir / (folder + f"-results-{service}.json")
+            folder_path = PRIVATE_DATASET / folder
+            record_json = {}
             with open(json_result_path.as_posix(), "w") as result_file:
-                for x in p:
-                    print(str(i) + " processing scan: " + str(x.name))
+                for x in sorted(folder_path.glob('**/*.png')):
                     if x.is_file():
                         scan_id = x.stem
                         t_start = time.time()
-                        json_result = digit.run(x, scan_id)
-                        elapsed = t_start - time.time()
-                        times.append(elapsed)
-                        record_json[scan_id] = json_result
-                        i += 1
-                    else:
-                        print("File " + x.name + " is not file")
+                        record_json[scan_id] = digit.run(x, scan_id)
+                        times.append(time.time() - t_start)
                 json.dump(record_json, result_file, sort_keys=True, indent=4)
-                record_json.clear()
 
-        print("Time taken: " + str(time.time() - t_start))
-        print("Average time: " + str(sum(times) / len(times)))
-        print("All times: " + str(times))
+        self.assertGreater(len(times), 0)
 
 
 if __name__ == '__main__':
     unittest.main()
-    print('Done!')

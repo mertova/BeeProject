@@ -9,10 +9,10 @@ from geometry.vertex import Vertex
 from test.test_image_processing.test_image import TestImage
 
 
-class TestReference(TestImage):
+class TestForm(TestImage):
 
     def setUp(self):
-        path_form = self.test_root_path / "./resources/form_contrasted_31_clean.png"
+        path_form = self.test_root_path / "resources" / "form1" / "form_contrasted_31_clean.png"
         if not path_form.is_file():
             raise FileNotFoundError("Form does not exist on the path " + path_form.absolute().as_posix())
         self.form_image = cv2.imread(path_form.absolute().as_posix())

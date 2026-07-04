@@ -37,10 +37,15 @@ def _add_digitize_subcommand(subparsers):
                    help='Directory of filled form images (.png)')
     p.add_argument('-o', '--output', required=True, metavar='DIR',
                    help='Output directory for digitized JSON results')
-    p.add_argument('-c', '--credentials', required=True, metavar='FILE',
-                   help='Path to OCR credentials .json file')
+    p.add_argument('-s', '--service', choices=['google', 'azure', 'aws', 'tesseract'], default='google',
+                   help='OCR backend to use (default: google)')
+    p.add_argument('-c', '--credentials', default=None, metavar='FILE',
+                   help='Path to OCR credentials .json file (not needed for --service tesseract)')
     p.add_argument('-t', '--table', required=True, metavar='FILE',
                    help='Path to table definition .json from the extract step')
+    p.add_argument('-a', '--algo', choices=['sift', 'orb'], default='sift',
+                   help='Feature matching algorithm used to align scans to the template '
+                        '(must match the --algo used for bee extract; default: sift)')
     p.add_argument('--no-transform', action='store_true', default=False,
                    help='Skip image alignment to reference')
     p.add_argument('-D', '--debug', action='store_true', default=False,
@@ -91,8 +96,9 @@ def _run_extract(args):
 
 def _run_digitize(args):
     import json
+    import cv2
     from digitize import Digitize
-    from image_processing.form import Form
+    from image_processing.reference import Reference
     from table.table import Table
 
     dataset_path = Path(args.dataset)
@@ -100,10 +106,15 @@ def _run_digitize(args):
         print(f"error: dataset directory not found: {dataset_path}", file=sys.stderr)
         return 1
 
-    cred_path = Path(args.credentials)
-    if not cred_path.is_file() or cred_path.suffix != '.json':
-        print(f"error: credentials file not found or not .json: {cred_path}", file=sys.stderr)
-        return 1
+    cred_path = None
+    if args.service != 'tesseract':
+        if args.credentials is None:
+            print(f"error: --credentials is required for --service {args.service}", file=sys.stderr)
+            return 1
+        cred_path = Path(args.credentials)
+        if not cred_path.is_file() or cred_path.suffix != '.json':
+            print(f"error: credentials file not found or not .json: {cred_path}", file=sys.stderr)
+            return 1
 
     table_path = Path(args.table)
     if not table_path.is_file() or table_path.suffix != '.json':
@@ -117,11 +128,16 @@ def _run_digitize(args):
         table = Table()
         table.import_json(json.load(f))
 
-    template = Form(table.template_path)
+    template_image = cv2.imread(table.template_path)
+    if template_image is None:
+        print(f"error: could not load template image: {table.template_path}", file=sys.stderr)
+        return 1
+    template = Reference(template_image, args.algo)
     debug_dir = out_path / 'debug' if args.debug else None
     intervals = [('F3', 'I35')]
 
-    digitizer = Digitize(table, template, intervals, cred_path, debug_dir, transform=not args.no_transform)
+    digitizer = Digitize(table, template, intervals, args.service, cred_path, debug_dir,
+                        transform=not args.no_transform)
 
     digitalized_records = {}
     for x in sorted(dataset_path.glob('**/*.png')):
@@ -142,7 +158,7 @@ def _run_digitize(args):
 def main():
     parser = argparse.ArgumentParser(
         prog='bee',
-        description='BeeProject — digitization of tabular forms from scanned images'
+        description='BeeProject - digitization of tabular forms from scanned images'
     )
     subparsers = parser.add_subparsers(dest='command', metavar='COMMAND')
     subparsers.required = True

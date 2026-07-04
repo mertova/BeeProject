@@ -46,7 +46,7 @@ class Rectangle:
         return canvas
 
     def crop_image(self, image):
-        if self.pt1.is_more_than(self.pt2, 0.1):
+        if self.pt1.is_more_than(self.pt2):
             height = self.pt1.y - self.pt2.y
             width = self.pt1.x - self.pt2.x
             first = self.pt2

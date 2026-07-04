@@ -26,12 +26,8 @@ class LineUtilsTest(unittest.TestCase):
         result = [line1, line2, line3, line4]
         self.assertEqual(set(lines), set(result))
 
-        print(lines)
         canvas = np.zeros((500, 1000)) + 255
-        cv2.imshow("clean canvas", canvas)
-        line_canvas = line_utils.render_lines(canvas, lines, (0, 0, 0))
-        cv2.imshow("horizontal lines", line_canvas)
-        cv2.waitKey(0)
+        line_utils.render_lines(canvas, lines, (0, 0, 0))
 
 
 if __name__ == '__main__':

@@ -1,4 +1,3 @@
-import io
 import json
 from io import BytesIO
 
@@ -8,35 +7,41 @@ import numpy as np
 
 from ocr_services.google_vision import GoogleVision
 from ocr_services.microsoft_azure import MicrosoftAzure
+from ocr_services.amazon_aws import Aws
+from ocr_services.tesseract import Tesseract
+
+SERVICES = ('google', 'azure', 'aws', 'tesseract')
 
 
-def call_services(credentials, image: np.array) -> dict:
+def call_services(service: str, credentials, image: np.array) -> dict:
     """
-    Call Google Vision and Microsoft Azure services using credentials.
-    :param credentials: json file containing credentials.
+    Run OCR on `image` with the selected service.
+    :param service: one of 'google', 'azure', 'aws', 'tesseract'.
+    :param credentials: path to the service's credentials .json file (ignored for 'tesseract').
     :param image: document to be processed.
-    :return: dictionaries containing Google Vision and Microsoft Azure OcrAnnotations.
+    :return: {service: list[OcrAnnotation]}
     """
+    if service not in SERVICES:
+        raise ValueError(f"unknown OCR service {service!r}, expected one of {SERVICES}")
 
-    # load credentials
-    with open(credentials, 'r') as f:
-        credentials_json = json.load(f)
+    if service == 'google':
+        google_vision = GoogleVision(credentials)
+        annotations = google_vision.detect_document(get_stream_img(image))
+    elif service == 'azure':
+        with open(credentials, 'r') as f:
+            credentials_json = json.load(f)
+        azure = MicrosoftAzure(credentials_json['microsoft_api_key'])
+        annotations = azure.detect_document(BytesIO(get_stream_img(image)))
+    elif service == 'aws':
+        with open(credentials, 'r') as f:
+            credentials_json = json.load(f)
+        aws = Aws(credentials_json)
+        img_height, img_width = image.shape[:2]
+        annotations = aws.detect_document(BytesIO(get_stream_img(image)), img_width, img_height)
+    else:  # tesseract
+        annotations = Tesseract().detect_document(image)
 
-    result = {}
-
-    google_vision = GoogleVision(credentials)
-    result['google'] = google_vision.detect_document(get_stream_img(image))
-
-    """
-    image_pil = Im.fromarray(image)
-    image_stream = io.BytesIO()
-    image_pil.save(image_stream, format='JPEG')
-
-    azure = MicrosoftAzure(credentials_json['microsoft_api_key'])
-    result['azure'] = azure.detect_document(image_stream)
-    """
-    # ToDO AMAZON AWS, Dtrocr ?
-    return result
+    return {service: annotations}
 
 
 def get_stream_img(img):
@@ -49,7 +54,6 @@ def get_stream_img(img):
 
 
 def render_annotations(image_path: str, ocr_annotations, canvas, with_text=False):
-    # todo calls table annotation
     for annotation in ocr_annotations:
         canvas = annotation.render(canvas, with_text)
     cv2.imwrite(image_path, canvas)

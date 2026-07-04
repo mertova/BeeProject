@@ -189,8 +189,6 @@ class LineTest(unittest.TestCase):
         blank_canvas = np.zeros((300, 200, 3), np.uint8)
 
         line_img = line.render(blank_canvas, (200, 200, 100))
-        cv2.imshow("line_img", line_img)
-        cv2.waitKey(0)
 
         self.assertTrue(np.array_equal(line_img.shape, (300, 200, 3)))
 

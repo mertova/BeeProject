@@ -10,9 +10,7 @@ from geometry.vertex import Vertex
 def show_rectangle_and_point(rectangle: Rectangle, point: Vertex, caption: str):
     blank_canvas = np.zeros((300, 300, 3), np.uint8)
     img = rectangle.render(blank_canvas)
-    img = point.render(img, (0, 0, 200), 2)
-    cv2.imshow(caption, img)
-    cv2.waitKey(0)
+    return point.render(img, (0, 0, 200), 2)
 
 
 class RectangleTest(unittest.TestCase):
@@ -96,13 +94,9 @@ class RectangleTest(unittest.TestCase):
         blank_canvas_copy = blank_canvas.copy()
         pt1.render(blank_canvas_copy, (255, 0, 0), 2)
         pt2.render(blank_canvas_copy, (255, 0, 0), 2)
-        cv2.imshow("rectangle", blank_canvas_copy)
 
         # test
         cropped_image = rectangle.crop_image(blank_canvas)
-        cv2.imshow("cropped_rectangle", cropped_image)
-        cv2.waitKey(0)
-        print(cropped_image.shape)
         self.assertEqual((180, 130, 3), cropped_image.shape)
 
         for i in range(len(cropped_image)):

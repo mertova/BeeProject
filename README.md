@@ -42,7 +42,7 @@ Digitization runs in two steps:
 A clean, averaged template is recovered from a batch of handwritten sample scans using feature matching (SIFT or ORB). The Hough line transform then detects the table grid and produces a cell map in JSON.
 
 **Step 2 — Digitization (`bee digitize`)**
-Each scan is aligned to the template, preprocessed to remove handwriting from the background, and passed to one or more OCR services. Recognized text is mapped back to individual cells and exported as a structured JSON record.
+Each scan is aligned to the template, preprocessed to remove handwriting from the background, and passed to an OCR backend (Google Vision, Azure, AWS Textract, or local Tesseract). Recognized text is mapped back to individual cells and exported as a structured JSON record.
 
 ---
 
@@ -63,13 +63,15 @@ bee extract \
   --reference resources/form1/reference.png \
   --output   resources/play-data/extracted_form
 
-# Step 2 — digitize the filled forms
+# Step 2 — digitize the filled forms (Tesseract runs locally, no credentials needed)
 bee digitize \
-  --dataset     resources/play-data/test_data_2014 \
-  --output      resources/play-data/results \
-  --credentials resources/credentials/credentials_google.json \
-  --table       resources/play-data/extracted_form/table.json
+  --dataset resources/play-data/test_data_2014 \
+  --output  resources/play-data/results \
+  --service tesseract \
+  --table   resources/play-data/extracted_form/table.json
 ```
+
+Tesseract needs the [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) binary installed locally. For the cloud backends used to produce the paper's reported CER/WER numbers (Google Vision, Azure), see [OCR credentials](#ocr-credentials).
 
 ---
 
@@ -86,6 +88,15 @@ This registers the `bee` command globally in your environment. Verify with:
 ```shell
 bee --help
 ```
+
+### Running tests
+
+```shell
+pip install -e ".[test]"
+pytest
+```
+
+Tests that call live OCR services or reference the author's private full-size dataset skip automatically when credentials or that dataset aren't present.
 
 ---
 
@@ -125,17 +136,20 @@ bee extract -d DIR -r FILE [options]
 Aligns, preprocesses, and OCR-processes each scan. Maps recognized text to table cells.
 
 ```
-bee digitize -d DIR -o DIR -c FILE -t FILE [options]
+bee digitize -d DIR -o DIR -t FILE [-s SERVICE] [-c FILE] [options]
 ```
 
 | Flag | Long form | Type | Default | Description |
 |------|-----------|------|---------|-------------|
 | `-d` | `--dataset` | path | **required** | Directory of filled form images (`.png`) |
 | `-o` | `--output` | path | **required** | Output directory for results |
-| `-c` | `--credentials` | path | **required** | OCR credentials `.json` file |
 | `-t` | `--table` | path | **required** | Table definition `.json` from the extract step |
+| `-s` | `--service` | `google`\|`azure`\|`aws`\|`tesseract` | `google` | OCR backend to run |
+| `-c` | `--credentials` | path | required unless `--service tesseract` | OCR credentials `.json` file, shaped per [OCR credentials](#ocr-credentials) |
 | | `--no-transform` | flag | off | Skip alignment to reference |
 | `-D` | `--debug` | flag | off | Save intermediate images to `output/debug/` |
+
+Each run digitizes with exactly one OCR backend. To compare backends on the same dataset, run `bee digitize` once per `--service` value into separate output directories.
 
 **Output** written to `--output`:
 
@@ -165,15 +179,14 @@ Cell identifiers follow spreadsheet notation: column letter + row number (`A0`, 
 
 ### `out_<dataset>.json` — digitized records
 
+Records are keyed by image ID, then by the `--service` used for that run:
+
 ```json
 {
   "1": {
     "google": [
       { "cell": "F3",  "text": "12.4", "confidence": 0.91 },
       { "cell": "F4",  "text": "11.8", "confidence": 0.87 }
-    ],
-    "azure": [
-      { "cell": "F3",  "text": "12.4", "confidence": 0.95 }
     ]
   }
 }
@@ -185,7 +198,7 @@ Cell identifiers follow spreadsheet notation: column letter + row number (`A0`, 
 
 ## OCR credentials
 
-BeeProject supports three cloud OCR services and one local engine. Place credential files anywhere and point to them with `--credentials`.
+BeeProject supports three cloud OCR services and one local engine, selected per run with `--service`. Place credential files anywhere and point to them with `--credentials` (not needed for `--service tesseract`).
 
 ### Google Vision
 
@@ -234,15 +247,15 @@ BeeProject supports three cloud OCR services and one local engine. Place credent
 
 ```json
 {
-    "aws_access_key_id": "YOUR_KEY_ID",
-    "aws_secret_access_key": "YOUR_SECRET",
-    "region_name": "eu-central-1"
+    "ACCESS_KEY": "YOUR_KEY_ID",
+    "SECRET_KEY": "YOUR_SECRET",
+    "REGION": "eu-central-1"
 }
 ```
 
 ### Tesseract (local, no credentials required)
 
-Install [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) locally. No credential file needed — pass any valid `.json` file as a placeholder.
+Install [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) locally and make sure the `tesseract` binary is on your `PATH`. Run with `--service tesseract` and omit `--credentials` entirely.
 
 ---
 
