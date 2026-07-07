@@ -1,5 +1,6 @@
 # BeeProject
 
+[![Tests](https://github.com/mertova/BeeProject/actions/workflows/tests.yml/badge.svg)](https://github.com/mertova/BeeProject/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Paper](https://img.shields.io/badge/JCDL'24-10.1145/3677389.3702599-b31b1b.svg)](https://doi.org/10.1145/3677389.3702599)
@@ -16,6 +17,7 @@ The pipeline was developed to digitize beekeeping observation records collected 
 <p align="center">
   <img src="resources/readmeImgs/workflow.png" alt="Two-step digitization workflow" width="720">
 </p>
+
 ---
 
 ## Contents
@@ -191,8 +193,6 @@ Records are keyed by image ID, then by the `--service` used for that run:
   }
 }
 ```
-
-<!-- TODO: add annotated schema diagrams here -->
 
 ---
 

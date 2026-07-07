@@ -4,7 +4,6 @@ from geometry.vertex import Vertex
 
 
 class VertexTest(unittest.TestCase):
-    # todo: 1. type check 2. more than
 
     def test_init(self):
         vertex = Vertex(1, 3)
@@ -12,23 +11,32 @@ class VertexTest(unittest.TestCase):
         self.assertEqual(vertex.y, 3)
 
     def test_negative_number_init(self):
-        self.assertRaises(ValueError, Vertex, -1, 3)
+        # negative coordinates are allowed (intermediate geometry can fall outside the image)
+        vertex = Vertex(-1, 3)
+        self.assertEqual(vertex.x, -1)
+        self.assertEqual(vertex.y, 3)
 
-    def test_incorrect_type_number_init(self):
-        # todo
+    def test_coercible_input_init(self):
+        # numeric strings and floats are coerced to the nearest integer
         vertex = Vertex("1", 4.6)
-        self.assertRaises(ValueError, Vertex, "1", 4.6)
+        self.assertEqual(vertex.x, 1)
+        self.assertEqual(vertex.y, 5)
+
+    def test_non_numeric_init_raises(self):
+        self.assertRaises(ValueError, Vertex, "abc", 3)
+        self.assertRaises(ValueError, Vertex, None, 3)
 
     def test_is_more_than_1(self):
-        # todo
         v1 = Vertex(1, 3)
         v2 = Vertex(2, 3)
         self.assertTrue(v2.is_more_than(v1))
 
     def test_is_more_than_2(self):
-        v1 = Vertex(2, 4)
-        v2 = Vertex(2, 3)
+        # equal x: comparison falls through to y
+        v1 = Vertex(2, 3)
+        v2 = Vertex(2, 4)
         self.assertTrue(v2.is_more_than(v1))
+        self.assertFalse(v1.is_more_than(v2))
 
     def test_as_tuple(self):
         vertex = Vertex(2, 7)
